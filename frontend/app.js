@@ -91,6 +91,14 @@ const drilldownModal = $('drilldown-modal');
 const drilldownTitle = $('drilldown-title');
 const drilldownBody  = $('drilldown-body');
 const drilldownClose = $('drilldown-close');
+const reportsModal   = $('reports-modal');
+const reportsFrom    = $('reports-from');
+const reportsTo      = $('reports-to');
+const reportsRun     = $('reports-run');
+const reportsClose   = $('reports-close');
+const reportsCancel  = $('reports-cancel');
+const reportsDownload = $('reports-download');
+const reportsSummary = $('reports-summary');
 const composeInbox  = $('compose-inbox');
 const composeTo     = $('compose-to');
 const composeCc     = $('compose-cc');
@@ -622,6 +630,71 @@ modalSend.addEventListener('click', async () => {
   }
 });
 
+// ── Reports (query-type) ──────────────────────────────────────────────────────
+
+// date inputs are YYYY-MM-DD; expand to inclusive UTC day bounds for the API.
+function reportsRangeQuery() {
+  const qs = new URLSearchParams();
+  if (reportsFrom.value) qs.set('from', `${reportsFrom.value}T00:00:00.000Z`);
+  if (reportsTo.value)   qs.set('to',   `${reportsTo.value}T23:59:59.999Z`);
+  const s = qs.toString();
+  return s ? `?${s}` : '';
+}
+
+function openReports() {
+  // default range: first of the current month → today
+  const now = new Date();
+  const iso = d => d.toISOString().slice(0, 10);
+  reportsFrom.value = iso(new Date(now.getFullYear(), now.getMonth(), 1));
+  reportsTo.value = iso(now);
+  reportsModal.classList.add('visible');
+  runReport();
+}
+
+function closeReports() {
+  reportsModal.classList.remove('visible');
+}
+
+async function runReport() {
+  reportsSummary.innerHTML = '<p class="form-label">Loading…</p>';
+  try {
+    const data = await apiFetch(`/api/reports/query-types${reportsRangeQuery()}`);
+    if (!data.byType || data.byType.length === 0) {
+      reportsSummary.innerHTML = '<p class="form-label">No tagged replies in this range yet.</p>';
+      return;
+    }
+    const cellL = 'padding:6px 10px;';
+    const cellR = 'padding:6px 10px; text-align:right; color:var(--brand-cream);';
+    const th = 'padding:6px 10px; color:var(--text-muted); text-transform:uppercase; font-size:10px; letter-spacing:1.2px;';
+    const body = data.byType.map(r =>
+      `<tr><td style="${cellL}">${esc(r.queryType)}</td><td style="${cellR}">${r.count}</td></tr>`
+    ).join('');
+    reportsSummary.innerHTML =
+      `<table style="width:100%; border-collapse:collapse; font-size:13px;">` +
+      `<thead><tr><th style="text-align:left; ${th}">Query type</th>` +
+      `<th style="text-align:right; ${th}">Replies</th></tr></thead>` +
+      `<tbody>${body}</tbody>` +
+      `<tfoot><tr style="border-top:1px solid var(--border-default);">` +
+      `<td style="${cellL} font-weight:500;">Total</td>` +
+      `<td style="${cellR} font-weight:500;">${data.total}</td></tr></tfoot></table>`;
+  } catch (err) {
+    reportsSummary.innerHTML =
+      `<p class="form-label" style="color:var(--status-danger);">Couldn’t load report: ${esc(err.message)}</p>`;
+  }
+}
+
+function downloadReportCsv() {
+  // same-origin navigation carries the session cookie; the attachment header
+  // makes the browser download rather than navigate away.
+  window.location.href = `/api/reports/query-types.csv${reportsRangeQuery()}`;
+}
+
+reportsRun.addEventListener('click', runReport);
+reportsDownload.addEventListener('click', downloadReportCsv);
+reportsClose.addEventListener('click', closeReports);
+reportsCancel.addEventListener('click', closeReports);
+reportsModal.addEventListener('click', e => { if (e.target === reportsModal) closeReports(); });
+
 // ── Sidebar navigation ────────────────────────────────────────────────────────
 
 document.querySelectorAll('.inbox-item').forEach(el => {
@@ -629,6 +702,7 @@ document.querySelectorAll('.inbox-item').forEach(el => {
     if (el.dataset.view === 'overview') { showOverview(); return; }
     if (el.dataset.view === 'hypercare') { showHypercare(); return; }
     if (el.dataset.view === 'topclients') { showTopClients(); return; }
+    if (el.dataset.view === 'reports') { openReports(); return; }
     if (el.dataset.view === 'settings') { showSettings(); return; }
     const key = el.dataset.inbox;
     if (key) {

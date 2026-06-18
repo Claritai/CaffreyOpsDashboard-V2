@@ -111,6 +111,13 @@
 
       <div class="sidebar-section">
         <div class="sidebar-label">Configure</div>
+        <div class="inbox-item" data-view="reports">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide BarChart3 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="4" width="3" height="14"/></svg>
+          </span>
+          <span class="inbox-name">Reports</span>
+        </div>
         <div class="inbox-item" data-view="settings">
           <span class="inbox-icon" aria-hidden="true">
             <!-- lucide Settings -->
@@ -300,6 +307,36 @@
   </div>
 </div>
 
+<!-- ── Reports Modal ───────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="reports-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>Query Type Report</span>
+      <button class="btn btn-secondary btn-sm" id="reports-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="display:flex; gap:12px;">
+        <div style="flex:1;">
+          <label class="form-label" for="reports-from">From</label>
+          <input type="date" class="form-control" id="reports-from">
+        </div>
+        <div style="flex:1;">
+          <label class="form-label" for="reports-to">To</label>
+          <input type="date" class="form-control" id="reports-to">
+        </div>
+        <div style="align-self:flex-end;">
+          <button class="btn btn-secondary" id="reports-run">Run</button>
+        </div>
+      </div>
+      <div id="reports-summary"><p class="form-label">Pick a date range and click Run.</p></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="reports-cancel">Close</button>
+      <button class="btn btn-primary" id="reports-download" style="width:auto; padding:10px 24px;">Download CSV</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Drilldown Modal ─────────────────────────────────────────────────────── -->
 <div class="modal-overlay drilldown-overlay" id="drilldown-modal">
   <div class="modal drilldown-modal">
@@ -316,6 +353,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=36"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>

@@ -245,7 +245,7 @@ app.get('/api/emails/:inbox/:id', requireAuth, apiLimiter, async (req, res, next
 
 app.post('/api/emails/send', requireAuth, csrfProtect, sendLimiter, apiLimiter, async (req, res, next) => {
   try {
-    const { inbox, message } = req.body;
+    const { inbox, message, queryType } = req.body;
     if (!inbox || !message) return res.status(400).json({ error: 'inbox and message are required' });
     await sendMessage(req.session, inbox, { message });
     // GDPR: logs sender inbox, recipients, and subject. Drop `subject` here
@@ -256,9 +256,28 @@ app.post('/api/emails/send', requireAuth, csrfProtect, sendLimiter, apiLimiter, 
     auditLog.record('email_sent', {
       user: req.session.user && req.session.user.email,
       ip: req.ip,
-      detail: { inbox, recipients, subject: message.subject || null },
+      queryType: typeof queryType === 'string' ? queryType : null,
+      detail: { inbox, recipients, subject: message.subject || null, queryType: queryType || null },
     });
     res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+// ── Query-type reporting (read-only, for the Reports panel) ──────────────────
+app.get('/api/reports/query-types', requireAuth, apiLimiter, (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+    res.json(auditLog.queryTypeReport({ from, to }));
+  } catch (err) { next(err); }
+});
+
+app.get('/api/reports/query-types.csv', requireAuth, apiLimiter, (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+    const csv = auditLog.queryTypeReportCsv({ from, to });
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="query-type-report.csv"');
+    res.send(csv);
   } catch (err) { next(err); }
 });
 

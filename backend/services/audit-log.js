@@ -46,8 +46,16 @@ function openDb() {
     CREATE INDEX IF NOT EXISTS idx_audit_log_ts ON audit_log(ts);
     CREATE INDEX IF NOT EXISTS idx_audit_log_event ON audit_log(event);
   `);
+  // Migration: add query_type to existing databases that predate it. ALTER TABLE
+  // ADD COLUMN is a no-op-safe one-liner, but SQLite has no "IF NOT EXISTS" for
+  // columns, so we check table_info first.
+  const cols = db.prepare('PRAGMA table_info(audit_log)').all().map(c => c.name);
+  if (!cols.includes('query_type')) {
+    db.exec('ALTER TABLE audit_log ADD COLUMN query_type TEXT');
+  }
+  db.exec('CREATE INDEX IF NOT EXISTS idx_audit_log_query_type ON audit_log(query_type)');
   insertStmt = db.prepare(
-    'INSERT INTO audit_log (ts, event, user, ip, detail) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO audit_log (ts, event, user, ip, detail, query_type) VALUES (?, ?, ?, ?, ?, ?)'
   );
   return db;
 }
@@ -62,7 +70,7 @@ function openDb() {
  * @param {string} [fields.ip]     - source IP (typically req.ip; trust proxy is set)
  * @param {object|string} [fields.detail] - extra context (object is JSON-stringified, capped at 2KB)
  */
-function record(event, { user, ip, detail } = {}) {
+function record(event, { user, ip, detail, queryType } = {}) {
   try {
     openDb();
     let detailStr = null;
@@ -70,10 +78,64 @@ function record(event, { user, ip, detail } = {}) {
       detailStr = typeof detail === 'string' ? detail : JSON.stringify(detail);
       if (detailStr.length > 2048) detailStr = detailStr.slice(0, 2045) + '...';
     }
-    insertStmt.run(new Date().toISOString(), event, user || null, ip || null, detailStr);
+    insertStmt.run(new Date().toISOString(), event, user || null, ip || null, detailStr, queryType || null);
   } catch (e) {
     console.error('[audit] failed to record', event, e.message);
   }
 }
 
-module.exports = { record };
+/**
+ * Query-type reporting over recorded email sends.
+ *
+ * `from`/`to` are optional ISO timestamps (inclusive). Returns the per-type
+ * counts, the grand total, and the underlying tagged sends (capped) for export.
+ */
+function queryTypeReport({ from, to } = {}) {
+  openDb();
+  // Always bind both bounds so the prepared statement parameter set is stable
+  // (better-sqlite3 dislikes optional named params).
+  const f = from || '0000-01-01T00:00:00.000Z';
+  const t = to || '9999-12-31T23:59:59.999Z';
+  const where = "event = 'email_sent' AND query_type IS NOT NULL AND ts >= @from AND ts <= @to";
+
+  const byType = db.prepare(
+    `SELECT query_type AS queryType, COUNT(*) AS count
+       FROM audit_log WHERE ${where}
+       GROUP BY query_type ORDER BY count DESC, query_type`
+  ).all({ from: f, to: t });
+
+  const total = byType.reduce((s, r) => s + r.count, 0);
+
+  const rows = db.prepare(
+    `SELECT ts, user, query_type AS queryType, detail
+       FROM audit_log WHERE ${where}
+       ORDER BY ts DESC LIMIT 5000`
+  ).all({ from: f, to: t });
+
+  return { from: from || null, to: to || null, total, byType, rows };
+}
+
+/** CSV escaping for one cell. */
+function csvCell(v) {
+  const s = v == null ? '' : String(v);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+/** Build a CSV (one row per tagged send) for download. */
+function queryTypeReportCsv(opts) {
+  const { rows } = queryTypeReport(opts);
+  const header = ['Timestamp', 'User', 'Query Type', 'Inbox', 'Recipients', 'Subject'];
+  const lines = [header.join(',')];
+  for (const r of rows) {
+    let d = {};
+    try { d = r.detail ? JSON.parse(r.detail) : {}; } catch { /* leave d empty */ }
+    lines.push([
+      r.ts, r.user, r.queryType, d.inbox,
+      Array.isArray(d.recipients) ? d.recipients.join('; ') : '',
+      d.subject,
+    ].map(csvCell).join(','));
+  }
+  return lines.join('\r\n');
+}
+
+module.exports = { record, queryTypeReport, queryTypeReportCsv };
