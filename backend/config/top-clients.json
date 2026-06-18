@@ -1,0 +1,40 @@
+{
+  "clients": [
+    {
+      "name": "Maersk",
+      "domains": ["maersk.com", "maersk.ie"],
+      "annual_value_eur": 850000,
+      "sla_hours": 2
+    },
+    {
+      "name": "DHL",
+      "domains": ["dhl.com", "dhl.ie"],
+      "annual_value_eur": 720000,
+      "sla_hours": 2
+    },
+    {
+      "name": "Kuehne+Nagel",
+      "domains": ["kuehne-nagel.com", "kn-portal.com"],
+      "annual_value_eur": 680000,
+      "sla_hours": 2
+    },
+    {
+      "name": "Lidl Ireland",
+      "domains": ["lidl.ie"],
+      "annual_value_eur": 540000,
+      "sla_hours": 3
+    },
+    {
+      "name": "Tesco UK",
+      "domains": ["tesco.com", "tescologistics.com"],
+      "annual_value_eur": 510000,
+      "sla_hours": 3
+    },
+    {
+      "name": "DFDS",
+      "domains": ["dfds.com"],
+      "annual_value_eur": 460000,
+      "sla_hours": 3
+    }
+  ]
+}

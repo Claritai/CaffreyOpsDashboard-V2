@@ -1,0 +1,76 @@
+{
+  "categories": [
+    {
+      "id": "pharma",
+      "label": "Pharma Loads",
+      "icon": "🧪",
+      "color": "#e91e63",
+      "priority": 1,
+      "rules": {
+        "subject_keywords": ["pharma", "pharmaceutical", "medicine", "vaccine", "temperature controlled", "GDP", "cold chain"],
+        "sender_domains": ["pfizer.com", "astrazeneca.com", "novartis.com", "msd.com", "gsk.com"],
+        "sender_keywords": ["pharma", "pharmaceutical"]
+      }
+    },
+    {
+      "id": "complaints",
+      "label": "Complaints / Escalations",
+      "icon": "⚠️",
+      "color": "#f44336",
+      "priority": 1,
+      "rules": {
+        "subject_keywords": ["complaint", "urgent", "escalation", "damaged", "delayed", "missing", "wrong delivery", "claim", "incident"],
+        "sender_domains": [],
+        "sender_keywords": []
+      }
+    },
+    {
+      "id": "quotes",
+      "label": "Quote Requests",
+      "icon": "💰",
+      "color": "#4caf50",
+      "priority": 2,
+      "rules": {
+        "subject_keywords": ["quote", "quotation", "rate", "pricing", "tender", "rfq", "enquiry", "load available", "transport request"],
+        "sender_domains": [],
+        "sender_keywords": []
+      }
+    },
+    {
+      "id": "customs",
+      "label": "Customs / Documentation",
+      "icon": "📋",
+      "color": "#ff9800",
+      "priority": 2,
+      "rules": {
+        "subject_keywords": ["customs", "CMR", "T1", "T2", "EAD", "MRN", "declaration", "manifest", "documentation", "paperwork"],
+        "sender_domains": ["revenue.ie", "hmrc.gov.uk", "douane.fr"],
+        "sender_keywords": []
+      }
+    },
+    {
+      "id": "finance",
+      "label": "Finance / Invoicing",
+      "icon": "💼",
+      "color": "#2196f3",
+      "priority": 3,
+      "rules": {
+        "subject_keywords": ["invoice", "payment", "remittance", "credit note", "statement", "accounts", "overdue"],
+        "sender_domains": [],
+        "sender_keywords": ["accounts", "finance", "billing"]
+      }
+    },
+    {
+      "id": "it_alerts",
+      "label": "IT / Server Alerts",
+      "icon": "🔧",
+      "color": "#9c27b0",
+      "priority": 1,
+      "rules": {
+        "subject_keywords": ["alert", "monitoring", "downtime", "server", "outage", "error", "failed", "warning"],
+        "sender_domains": [],
+        "sender_keywords": ["postmaster", "mailer-daemon", "noreply", "monitoring", "alerts", "no-reply"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "vipClients": [
+    {
+      "name": "Maersk",
+      "domains": ["maersk.com", "maersk.ie"],
+      "reason": "Platinum tier — €850k annual"
+    },
+    {
+      "name": "DHL",
+      "domains": ["dhl.com", "dhl.ie"],
+      "reason": "Platinum tier — €720k annual"
+    },
+    {
+      "name": "Kuehne+Nagel",
+      "domains": ["kuehne-nagel.com", "kn-portal.com"],
+      "reason": "Platinum tier — €680k annual"
+    }
+  ],
+  "slaMinutes": 15,
+  "amberThresholdPct": 60,
+  "refreshIntervalSec": 30,
+  "audioAlertOnRed": true,
+  "managers": [
+    "Sean Laffey"
+  ]
+}
