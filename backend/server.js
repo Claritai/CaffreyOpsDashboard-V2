@@ -266,15 +266,15 @@ app.post('/api/emails/send', requireAuth, csrfProtect, sendLimiter, apiLimiter, 
 // ── Query-type reporting (read-only, for the Reports panel) ──────────────────
 app.get('/api/reports/query-types', requireAuth, apiLimiter, (req, res, next) => {
   try {
-    const { from, to } = req.query;
-    res.json(auditLog.queryTypeReport({ from, to }));
+    const { from, to, queryType } = req.query;
+    res.json(auditLog.queryTypeReport({ from, to, queryType }));
   } catch (err) { next(err); }
 });
 
 app.get('/api/reports/query-types.csv', requireAuth, apiLimiter, (req, res, next) => {
   try {
-    const { from, to } = req.query;
-    const csv = auditLog.queryTypeReportCsv({ from, to });
+    const { from, to, queryType } = req.query;
+    const csv = auditLog.queryTypeReportCsv({ from, to, queryType });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="query-type-report.csv"');
     res.send(csv);

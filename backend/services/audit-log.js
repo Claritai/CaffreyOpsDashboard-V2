@@ -90,19 +90,25 @@ function record(event, { user, ip, detail, queryType } = {}) {
  * `from`/`to` are optional ISO timestamps (inclusive). Returns the per-type
  * counts, the grand total, and the underlying tagged sends (capped) for export.
  */
-function queryTypeReport({ from, to } = {}) {
+function queryTypeReport({ from, to, queryType } = {}) {
   openDb();
   // Always bind both bounds so the prepared statement parameter set is stable
   // (better-sqlite3 dislikes optional named params).
   const f = from || '0000-01-01T00:00:00.000Z';
   const t = to || '9999-12-31T23:59:59.999Z';
-  const where = "event = 'email_sent' AND query_type IS NOT NULL AND ts >= @from AND ts <= @to";
+  let where = "event = 'email_sent' AND query_type IS NOT NULL AND ts >= @from AND ts <= @to";
+  const params = { from: f, to: t };
+  // Optional single-type filter. Empty/absent means "all types".
+  if (queryType) {
+    where += ' AND query_type = @queryType';
+    params.queryType = queryType;
+  }
 
   const byType = db.prepare(
     `SELECT query_type AS queryType, COUNT(*) AS count
        FROM audit_log WHERE ${where}
        GROUP BY query_type ORDER BY count DESC, query_type`
-  ).all({ from: f, to: t });
+  ).all(params);
 
   const total = byType.reduce((s, r) => s + r.count, 0);
 
@@ -110,9 +116,9 @@ function queryTypeReport({ from, to } = {}) {
     `SELECT ts, user, query_type AS queryType, detail
        FROM audit_log WHERE ${where}
        ORDER BY ts DESC LIMIT 5000`
-  ).all({ from: f, to: t });
+  ).all(params);
 
-  return { from: from || null, to: to || null, total, byType, rows };
+  return { from: from || null, to: to || null, queryType: queryType || null, total, byType, rows };
 }
 
 /** CSV escaping for one cell. */

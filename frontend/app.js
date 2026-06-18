@@ -94,6 +94,7 @@ const drilldownClose = $('drilldown-close');
 const reportsModal   = $('reports-modal');
 const reportsFrom    = $('reports-from');
 const reportsTo      = $('reports-to');
+const reportsType    = $('reports-type');
 const reportsRun     = $('reports-run');
 const reportsClose   = $('reports-close');
 const reportsCancel  = $('reports-cancel');
@@ -637,11 +638,27 @@ function reportsRangeQuery() {
   const qs = new URLSearchParams();
   if (reportsFrom.value) qs.set('from', `${reportsFrom.value}T00:00:00.000Z`);
   if (reportsTo.value)   qs.set('to',   `${reportsTo.value}T23:59:59.999Z`);
+  if (reportsType.value) qs.set('queryType', reportsType.value);
   const s = qs.toString();
   return s ? `?${s}` : '';
 }
 
+// Keep the filter list in sync with the reply dropdown automatically by cloning
+// its options (relabelling the empty one as "All query types").
+function populateReportTypeFilter() {
+  const opts = Array.from(document.querySelectorAll('#compose-query-type option'));
+  if (!opts.length) return;
+  const current = reportsType.value;
+  reportsType.innerHTML = opts.map((o, i) =>
+    i === 0
+      ? '<option value="">All query types</option>'
+      : `<option value="${esc(o.value)}">${esc(o.textContent)}</option>`
+  ).join('');
+  reportsType.value = current; // preserve selection across reopens
+}
+
 function openReports() {
+  populateReportTypeFilter();
   // default range: first of the current month → today
   const now = new Date();
   const iso = d => d.toISOString().slice(0, 10);
@@ -690,6 +707,7 @@ function downloadReportCsv() {
 }
 
 reportsRun.addEventListener('click', runReport);
+reportsType.addEventListener('change', runReport);
 reportsDownload.addEventListener('click', downloadReportCsv);
 reportsClose.addEventListener('click', closeReports);
 reportsCancel.addEventListener('click', closeReports);
