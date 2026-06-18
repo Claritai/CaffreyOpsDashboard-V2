@@ -16,6 +16,8 @@ const { withCache, TTL, invalidate } = require('./services/cache');
 const { getClientHealth, getAllClientThreads } = require('./services/client-health');
 const topclientsConfig = require('./services/topclients-config');
 const categoriesConfig = require('./services/categories-config');
+const replyTemplatesConfig = require('./services/reply-templates-config');
+const cannedResponses = require('./services/canned-responses-store');
 const { getCategories } = require('./services/hotlist');
 const { getPerformance, getMissed, getStalled } = require('./services/performance');
 const { getItAlerts } = require('./services/it-alerts');
@@ -260,6 +262,28 @@ app.post('/api/emails/send', requireAuth, csrfProtect, sendLimiter, apiLimiter, 
       detail: { inbox, recipients, subject: message.subject || null, queryType: queryType || null },
     });
     res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+// ── Reply / canned responses (DB-backed, editable in the Canned Responses view)
+app.get('/api/reply-templates', requireAuth, (req, res) => {
+  res.json(cannedResponses.getConfig());
+});
+
+app.post('/api/reply-templates', requireAuth, csrfProtect, apiLimiter, (req, res, next) => {
+  try {
+    const { name, body } = req.body;
+    const config = cannedResponses.upsert(name, body);
+    auditLog.record('canned_response_saved', { user: req.session.user && req.session.user.email, ip: req.ip, detail: { name } });
+    res.json({ ok: true, config });
+  } catch (err) { next(err); }
+});
+
+app.delete('/api/reply-templates/:name', requireAuth, csrfProtect, apiLimiter, (req, res, next) => {
+  try {
+    const config = cannedResponses.remove(req.params.name);
+    auditLog.record('canned_response_deleted', { user: req.session.user && req.session.user.email, ip: req.ip, detail: { name: req.params.name } });
+    res.json({ ok: true, config });
   } catch (err) { next(err); }
 });
 

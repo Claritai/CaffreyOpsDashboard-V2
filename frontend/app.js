@@ -100,12 +100,22 @@ const reportsClose   = $('reports-close');
 const reportsCancel  = $('reports-cancel');
 const reportsDownload = $('reports-download');
 const reportsSummary = $('reports-summary');
+const cannedModal    = $('canned-modal');
+const cannedClose    = $('canned-close');
+const cannedList     = $('canned-list');
+const cannedName     = $('canned-name');
+const cannedBody     = $('canned-body');
+const cannedClear    = $('canned-clear');
+const cannedSave     = $('canned-save');
+const cannedFormTitle = $('canned-form-title');
 const composeInbox  = $('compose-inbox');
 const composeTo     = $('compose-to');
 const composeCc     = $('compose-cc');
 const composeSubject = $('compose-subject');
 const composeQueryType      = $('compose-query-type');
 const composeQueryTypeGroup = $('compose-query-type-group');
+const composeTemplate       = $('compose-template');
+const composeTemplateGroup  = $('compose-template-group');
 const composeBody   = $('compose-body');
 const statTotalUnread = $('stat-total-unread');
 const lastRefreshLabel = $('last-refresh-label');
@@ -551,9 +561,12 @@ function openCompose(opts = {}) {
   composeTo.value = opts.to || '';
   composeSubject.value = opts.subject || '';
   composeBody.value = opts.body || '';
-  // Query type is only relevant when replying to an inbound email.
+  // Query type + canned responses are only relevant when replying.
   composeQueryTypeGroup.hidden = !opts.reply;
   composeQueryType.value = '';
+  composeTemplateGroup.hidden = !opts.reply;
+  composeTemplate.value = '';
+  if (opts.reply) populateTemplateDropdown();
   composeModal.classList.add('visible');
   composeTo.focus();
 }
@@ -578,10 +591,56 @@ function closeCompose() {
   composeCc.value = '';
   composeQueryType.value = '';
   composeQueryTypeGroup.hidden = true;
+  composeTemplate.value = '';
+  composeTemplateGroup.hidden = true;
 }
 
 modalClose.addEventListener('click', closeCompose);
 modalCancel.addEventListener('click', closeCompose);
+
+// ── Canned responses ──────────────────────────────────────────────────────────
+// Templates are fetched once and cached. The reply box gets a "Canned responses"
+// dropdown listing them; picking one drops it into the message box (confirming
+// first if the operator already typed something), then resets so it reads as an
+// action rather than a sticky selection.
+let replyTemplates = null;
+async function ensureReplyTemplates() {
+  if (replyTemplates) return replyTemplates;
+  try {
+    const data = await apiFetch('/api/reply-templates');
+    replyTemplates = (data && data.templates) || {};
+  } catch {
+    replyTemplates = {};
+  }
+  return replyTemplates;
+}
+
+async function populateTemplateDropdown() {
+  const templates = await ensureReplyTemplates();
+  const names = Object.keys(templates);
+  const opts = ['<option value="">Insert a canned response…</option>']
+    .concat(names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`));
+  composeTemplate.innerHTML = opts.join('');
+  // Hide the control entirely if no templates are configured.
+  composeTemplateGroup.hidden = names.length === 0 || composeQueryTypeGroup.hidden;
+}
+
+composeTemplate.addEventListener('change', async () => {
+  const name = composeTemplate.value;
+  if (!name) return;
+  const templates = await ensureReplyTemplates();
+  const tpl = templates[name];
+  if (tpl) {
+    const current = composeBody.value.trim();
+    if (current && current !== tpl.trim() && !confirm(`Replace the current message with the “${name}” response?`)) {
+      composeTemplate.value = '';
+      return;
+    }
+    composeBody.value = tpl;
+    composeBody.focus();
+  }
+  composeTemplate.value = ''; // reset to the placeholder after inserting
+});
 composeModal.addEventListener('click', e => { if (e.target === composeModal) closeCompose(); });
 
 modalSend.addEventListener('click', async () => {
@@ -713,6 +772,110 @@ reportsClose.addEventListener('click', closeReports);
 reportsCancel.addEventListener('click', closeReports);
 reportsModal.addEventListener('click', e => { if (e.target === reportsModal) closeReports(); });
 
+// ── Canned responses manager ──────────────────────────────────────────────────
+let cannedEditingName = null;
+
+function openCannedManager() {
+  resetCannedForm();
+  cannedModal.classList.add('visible');
+  renderCannedList();
+}
+function closeCannedManager() {
+  cannedModal.classList.remove('visible');
+}
+function resetCannedForm() {
+  cannedEditingName = null;
+  cannedName.value = '';
+  cannedBody.value = '';
+  cannedFormTitle.textContent = 'Add a new response';
+  cannedSave.textContent = 'Save response';
+}
+
+async function renderCannedList() {
+  cannedList.innerHTML = '<p class="form-label">Loading…</p>';
+  try {
+    const data = await apiFetch('/api/reply-templates');
+    const templates = (data && data.templates) || {};
+    const names = Object.keys(templates);
+    if (!names.length) {
+      cannedList.innerHTML = '<p class="form-label">No canned responses yet. Add one below.</p>';
+      return;
+    }
+    cannedList.innerHTML = names.map(name => {
+      const preview = templates[name].replace(/\s+/g, ' ').slice(0, 80);
+      return `<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);">
+        <div style="min-width:0;">
+          <div style="font-weight:500; color:var(--text-primary);">${esc(name)}</div>
+          <div style="font-size:12px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(preview)}…</div>
+        </div>
+        <div style="flex-shrink:0; display:flex; gap:8px;">
+          <button class="btn btn-secondary btn-sm" data-canned-edit="${esc(name)}">Edit</button>
+          <button class="btn btn-secondary btn-sm" data-canned-del="${esc(name)}">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+    cannedList.querySelectorAll('[data-canned-edit]').forEach(b =>
+      b.addEventListener('click', () => editCanned(b.dataset.cannedEdit, templates[b.dataset.cannedEdit])));
+    cannedList.querySelectorAll('[data-canned-del]').forEach(b =>
+      b.addEventListener('click', () => deleteCanned(b.dataset.cannedDel)));
+  } catch (err) {
+    cannedList.innerHTML = `<p class="form-label" style="color:var(--status-danger);">Couldn’t load responses: ${esc(err.message)}</p>`;
+  }
+}
+
+function editCanned(name, body) {
+  cannedEditingName = name;
+  cannedName.value = name;
+  cannedBody.value = body;
+  cannedFormTitle.textContent = `Editing “${name}”`;
+  cannedSave.textContent = 'Update response';
+  cannedBody.focus();
+}
+
+async function deleteCanned(name) {
+  if (!confirm(`Delete the canned response “${name}”?`)) return;
+  try {
+    await apiFetch(`/api/reply-templates/${encodeURIComponent(name)}`, { method: 'DELETE' });
+    replyTemplates = null; // invalidate the reply-box cache so the dropdown updates
+    toast('Canned response deleted.', 'success');
+    if (cannedEditingName === name) resetCannedForm();
+    renderCannedList();
+  } catch (err) {
+    errorToast('Delete failed', err);
+  }
+}
+
+async function saveCanned() {
+  const name = cannedName.value.trim();
+  const body = cannedBody.value;
+  if (!name || !body.trim()) { toast('Name and response are both required.', 'error'); return; }
+  cannedSave.disabled = true;
+  try {
+    await apiFetch('/api/reply-templates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, body }),
+    });
+    // renaming an existing response: remove the old key after writing the new one
+    if (cannedEditingName && cannedEditingName !== name) {
+      await apiFetch(`/api/reply-templates/${encodeURIComponent(cannedEditingName)}`, { method: 'DELETE' });
+    }
+    replyTemplates = null; // invalidate the reply-box cache
+    toast('Canned response saved.', 'success');
+    resetCannedForm();
+    renderCannedList();
+  } catch (err) {
+    errorToast('Save failed', err);
+  } finally {
+    cannedSave.disabled = false;
+  }
+}
+
+cannedSave.addEventListener('click', saveCanned);
+cannedClear.addEventListener('click', resetCannedForm);
+cannedClose.addEventListener('click', closeCannedManager);
+cannedModal.addEventListener('click', e => { if (e.target === cannedModal) closeCannedManager(); });
+
 // ── Sidebar navigation ────────────────────────────────────────────────────────
 
 document.querySelectorAll('.inbox-item').forEach(el => {
@@ -721,6 +884,7 @@ document.querySelectorAll('.inbox-item').forEach(el => {
     if (el.dataset.view === 'hypercare') { showHypercare(); return; }
     if (el.dataset.view === 'topclients') { showTopClients(); return; }
     if (el.dataset.view === 'reports') { openReports(); return; }
+    if (el.dataset.view === 'canned') { openCannedManager(); return; }
     if (el.dataset.view === 'settings') { showSettings(); return; }
     const key = el.dataset.inbox;
     if (key) {

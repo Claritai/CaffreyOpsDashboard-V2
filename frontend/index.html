@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=32">
+  <link rel="stylesheet" href="styles.css?v=33">
 </head>
 <body>
 
@@ -117,6 +117,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="4" width="3" height="14"/></svg>
           </span>
           <span class="inbox-name">Reports</span>
+        </div>
+        <div class="inbox-item" data-view="canned">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide MessageSquareText -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 9h10"/><path d="M7 13h6"/></svg>
+          </span>
+          <span class="inbox-name">Canned Responses</span>
         </div>
         <div class="inbox-item" data-view="settings">
           <span class="inbox-icon" aria-hidden="true">
@@ -295,6 +302,12 @@
           <option value="General Enquiry">General Enquiry</option>
         </select>
       </div>
+      <div class="form-group" id="compose-template-group" hidden>
+        <label class="form-label" for="compose-template">Canned responses</label>
+        <select class="form-control" id="compose-template">
+          <option value="">Insert a canned response…</option>
+        </select>
+      </div>
       <div class="form-group">
         <label class="form-label">Message</label>
         <textarea class="form-control" id="compose-body" placeholder="Write your message…"></textarea>
@@ -343,6 +356,33 @@
   </div>
 </div>
 
+<!-- ── Canned Responses Manager Modal ──────────────────────────────────────── -->
+<div class="modal-overlay" id="canned-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>Canned Responses</span>
+      <button class="btn btn-secondary btn-sm" id="canned-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="canned-list"><p class="form-label">Loading…</p></div>
+      <hr style="border:none; border-top:1px solid var(--border); margin:18px 0;">
+      <p class="form-label" id="canned-form-title" style="margin-bottom:10px;">Add a new response</p>
+      <div class="form-group">
+        <label class="form-label" for="canned-name">Name</label>
+        <input type="text" class="form-control" id="canned-name" placeholder="e.g. Quote — full trailer" maxlength="80">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="canned-body">Response</label>
+        <textarea class="form-control" id="canned-body" placeholder="Write the canned response…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="canned-clear">Clear</button>
+      <button class="btn btn-primary" id="canned-save" style="width:auto; padding:10px 24px;">Save response</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Drilldown Modal ─────────────────────────────────────────────────────── -->
 <div class="modal-overlay drilldown-overlay" id="drilldown-modal">
   <div class="modal drilldown-modal">
@@ -359,6 +399,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=38"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>

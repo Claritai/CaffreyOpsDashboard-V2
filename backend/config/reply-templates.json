@@ -1,0 +1,11 @@
+{
+  "templates": {
+    "ETA Request": "Hi [Name],\n\nThanks for your email. The current ETA for shipment [reference] is [date / time].\n\nWe'll let you know straight away if anything changes in transit. Please get in touch if there's anything else you need.\n\nKind regards,\nCaffrey International Operations",
+    "POD Request": "Hi [Name],\n\nThanks for your email. Please find attached the POD for shipment [reference], delivered on [date].\n\nIf you need any further documentation, just let us know.\n\nKind regards,\nCaffrey International Operations",
+    "Quote": "Hi [Name],\n\nThank you for your enquiry. Please find our quotation below:\n\nRoute: [origin] - [destination]\nEquipment: [trailer type]\nRate: [rate]\nTransit time: [days]\nValid until: [date]\n\nWe'd be happy to discuss or adjust this to suit your requirements.\n\nKind regards,\nCaffrey International Operations",
+    "Ferry Booking": "Hi [Name],\n\nThanks for your email. To secure the ferry booking, please confirm the following:\n\nSailing date: [date]\nRoute: [port] - [port]\nVehicle / Trailer reg: [reg]\nDriver name: [name]\n\nOnce confirmed we'll book and send you the sailing reference.\n\nKind regards,\nCaffrey International Operations",
+    "Customs Documentation": "Hi [Name],\n\nThanks for your email. To complete customs clearance for shipment [reference], please provide:\n\n- Commercial invoice\n- Packing list\n- [any other documents]\n\nOnce we have these we'll process the declaration and come back to you with the MRN.\n\nKind regards,\nCaffrey International Operations",
+    "Timeslot Booking": "Hi [Name],\n\nThanks for your email. We'd like to arrange a delivery / collection timeslot:\n\nSite: [location]\nDate: [date]\nPreferred time: [time]\nReference / PO: [reference]\n\nPlease confirm availability and we'll arrange accordingly.\n\nKind regards,\nCaffrey International Operations",
+    "General Enquiry": "Hi [Name],\n\nThank you for getting in touch.\n\n[Your response here]\n\nPlease don't hesitate to contact us if you have any further questions.\n\nKind regards,\nCaffrey International Operations"
+  }
+}

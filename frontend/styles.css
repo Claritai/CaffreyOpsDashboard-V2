@@ -1505,12 +1505,15 @@ body.demo-mode .content-area::before {
 textarea.form-control { resize: vertical; min-height: 180px; }
 
 /* All inputs in the compose/reply modal are white for readability. */
-#compose-modal .form-control {
+#compose-modal .form-control,
+#canned-modal .form-control {
   background: #ffffff;
   color: #0A1B3D;
 }
-#compose-modal .form-control::placeholder { color: #6b7280; }
-#compose-modal .form-control option { color: #0A1B3D; }
+#compose-modal .form-control::placeholder,
+#canned-modal .form-control::placeholder { color: #6b7280; }
+#compose-modal .form-control option,
+#canned-modal .form-control option { color: #0A1B3D; }
 
 /* ── Skeleton loaders ─────────────────────────────────────────────────────── */
 
