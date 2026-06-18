@@ -1,0 +1,17 @@
+[Unit]
+Description=Caffrey Ops Dashboard Backend
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/caffrey-ops/backend
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/caffrey-ops/backend/.env
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

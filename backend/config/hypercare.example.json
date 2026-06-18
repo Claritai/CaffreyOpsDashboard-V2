@@ -1,0 +1,17 @@
+{
+  "vipClients": [
+    {
+      "name": "Example VIP",
+      "domains": ["example.com"],
+      "reason": "Tier 1 contract"
+    }
+  ],
+  "slaMinutes": 15,
+  "amberThresholdPct": 60,
+  "refreshIntervalSec": 30,
+  "audioAlertOnRed": true,
+  "managers": [
+    "Manager One",
+    "Manager Two"
+  ]
+}

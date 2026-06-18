@@ -1,0 +1,28 @@
+{
+  "name": "caffrey-ops-backend",
+  "version": "1.0.0",
+  "description": "Caffrey International Email Operations Dashboard Backend",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20 <23"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "local": "node -r dotenv/config server.js dotenv_config_path=.env.local"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^2.16.2",
+    "axios": "^1.7.9",
+    "better-sqlite3-multiple-ciphers": "^12.9.0",
+    "better-sqlite3-session-store": "^0.1.0",
+    "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^4.0.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "node-cache": "^5.1.2"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "clients": [
+    {
+      "name": "Example Client",
+      "domains": ["example.com"],
+      "annual_value_eur": 100000,
+      "sla_hours": 4
+    }
+  ]
+}

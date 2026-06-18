@@ -1,0 +1,19 @@
+{
+  "name": "verify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "smoke": "node smoke-overview.js",
+    "drilldowns": "node verify-drilldowns.js",
+    "verify": "node smoke-overview.js && node verify-drilldowns.js",
+    "local": "./run-local.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}

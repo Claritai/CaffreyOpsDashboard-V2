@@ -1,0 +1,28 @@
+{
+  "categories": [
+    {
+      "id": "high_priority",
+      "label": "High Priority",
+      "icon": "⚠️",
+      "color": "#f44336",
+      "priority": 1,
+      "rules": {
+        "subject_keywords": ["urgent", "complaint", "escalation"],
+        "sender_domains": [],
+        "sender_keywords": []
+      }
+    },
+    {
+      "id": "quotes",
+      "label": "Quote Requests",
+      "icon": "💰",
+      "color": "#4caf50",
+      "priority": 2,
+      "rules": {
+        "subject_keywords": ["quote", "quotation", "rate", "pricing"],
+        "sender_domains": [],
+        "sender_keywords": []
+      }
+    }
+  ]
+}

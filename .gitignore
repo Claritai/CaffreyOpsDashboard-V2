@@ -1,0 +1,36 @@
+# Secrets — ignore every .env variant (.env, .env.local, .env.bak-*, .env.orig-*)
+# but keep the committed *.example templates.
+.env
+.env.*
+*.env
+!.env.example
+!.env.local.example
+
+# Data
+backend/data/
+backend/data.plaintext-backup-*/
+*.db
+*.db-wal
+*.db-shm
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Config containing commercial/personal data — commit *.example versions instead
+backend/config/top-clients.json
+backend/config/hypercare.json
+backend/config/categories.json
+
+# OS / editor noise
+.DS_Store
+*.swp
+
+# Tooling
+.claude/
+
+# Verify harness output — regenerated on every smoke/repro run
+verify/screenshots/*
+!verify/screenshots/.gitkeep

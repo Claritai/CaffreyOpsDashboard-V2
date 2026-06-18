@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caffrey International — Email Operations</title>
+  <link rel="stylesheet" href="styles.css?v=29">
+</head>
+<body>
+
+<!-- ── Login Screen ───────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo"><img src="caffrey-logo.png?v=1" alt="Caffrey International"></div>
+    <div class="tagline">Email Operations Dashboard</div>
+    <div class="error-msg" id="login-error"></div>
+    <button class="btn btn-primary" id="login-btn">
+      <span id="ms-icon"></span>
+      Sign in with Microsoft
+    </button>
+  </div>
+</div>
+
+<!-- ── App Shell ──────────────────────────────────────────────────────────── -->
+<div id="app">
+  <header>
+    <div class="header-brand"></div>
+    <div class="header-user">
+      <span class="demo-chip" id="demo-chip" hidden>DEMO MODE</span>
+      <button class="btn btn-secondary btn-sm" id="demo-toggle" title="Toggle demo data">Demo: off</button>
+      <span id="user-name"></span>
+      <button class="btn btn-secondary btn-sm" id="logout-btn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <img src="caffrey-logo.png?v=1" alt="Caffrey International" class="brand-logo">
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Dashboard</div>
+        <div class="inbox-item active" data-view="overview">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          </span>
+          <span class="inbox-name">Overview</span>
+        </div>
+        <div class="inbox-item" data-view="hypercare">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide ShieldAlert -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          </span>
+          <span class="inbox-name">Hypercare</span>
+          <span class="badge zero" id="badge-hypercare-red" title="Overdue loads">0</span>
+        </div>
+        <div class="inbox-item" data-view="topclients">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide Users -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="inbox-name">Top Clients</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Inboxes</div>
+        <div class="inbox-item" data-inbox="operations">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35"/><path d="M2 8.35 12 2l10 6.35"/><path d="M6 22V12h12v10"/><path d="M10 22v-5h4v5"/></svg>
+          </span>
+          <span class="inbox-name">Operations</span>
+          <span class="badge zero" id="badge-operations">0</span>
+        </div>
+        <div class="inbox-item" data-inbox="export">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l4-2.29"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/><path d="m17 18 2 2 4-4"/></svg>
+          </span>
+          <span class="inbox-name">Export</span>
+          <span class="badge zero" id="badge-export">0</span>
+        </div>
+        <div class="inbox-item" data-inbox="ireland">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.17 7.83 12 12l-4.17-4.17a4 4 0 1 1 4.17-6.66 4 4 0 1 1 4.17 6.66"/><path d="M7.83 16.17 12 12l4.17 4.17a4 4 0 1 1-4.17 6.66 4 4 0 1 1-4.17-6.66"/><line x1="12" y1="12" x2="2.5" y2="21.5"/></svg>
+          </span>
+          <span class="inbox-name">Ireland</span>
+          <span class="badge zero" id="badge-ireland">0</span>
+        </div>
+        <div class="inbox-item" data-inbox="uk">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 1-1h13l-3 6 3 6H5"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </span>
+          <span class="inbox-name">UK</span>
+          <span class="badge zero" id="badge-uk">0</span>
+        </div>
+        <div class="inbox-item" data-inbox="eu">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </span>
+          <span class="inbox-name">EU</span>
+          <span class="badge zero" id="badge-eu">0</span>
+        </div>
+        <div class="inbox-item" data-inbox="offers">
+          <span class="inbox-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </span>
+          <span class="inbox-name">Offers</span>
+          <span class="badge zero" id="badge-offers">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Configure</div>
+        <div class="inbox-item" data-view="settings">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide Settings -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+          <span class="inbox-name">Settings</span>
+        </div>
+      </div>
+
+      <div class="sidebar-stats">
+        <div class="sidebar-label">Overview</div>
+        <div class="stat-row">
+          <span>Total unread</span>
+          <span class="stat-val" id="stat-total-unread">—</span>
+        </div>
+        <div class="stat-row" style="margin-top:8px;font-size:11px;color:var(--text-muted)">
+          <span id="last-refresh-label">Last refresh: —</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="content-area">
+      <!-- Overview -->
+      <div class="overview-pane visible" id="overview-pane">
+        <div class="overview-header">
+          <div>
+            <h2 class="overview-title">Daily Overview</h2>
+            <div class="overview-subtitle" id="overview-subtitle">Live across all 6 mailboxes</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="overview-refresh">↻ Refresh</button>
+        </div>
+        <div class="critical-row" id="critical-row"></div>
+        <div class="missed-row" id="missed-row"></div>
+        <div class="performance-row" id="performance-row"></div>
+        <div class="overview-grid" id="overview-grid"></div>
+        <div class="category-row" id="category-row"></div>
+      </div>
+
+      <!-- Hypercare (standalone view) -->
+      <div class="hypercare-pane" id="hypercare-pane">
+        <div class="overview-header">
+          <div>
+            <h2 class="overview-title">Hypercare</h2>
+            <div class="overview-subtitle" id="hypercare-subtitle">VIP loads · 15-minute SLA</div>
+          </div>
+          <div class="hypercare-header-actions">
+            <button class="hypercare-notify-pill off" id="hypercare-notify-pill" title="Overdue-load alerts" hidden></button>
+            <span class="hypercare-refresh-countdown" id="hypercare-refresh-countdown" title="Time until next auto-refresh"></span>
+            <button class="btn btn-secondary btn-sm" id="hypercare-mute" title="Toggle sound alerts" aria-pressed="false">
+              <span class="hc-mute-icon">🔊</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="hypercare-refresh">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="hc-tabs" id="hypercare-tabs">
+          <button class="hc-tab active" data-hc-tab="queue">Action Queue</button>
+          <button class="hc-tab" data-hc-tab="handover">Shift Handover</button>
+        </div>
+        <div class="hypercare-summary" id="hypercare-summary"></div>
+        <div class="hypercare-queue" id="hypercare-queue"></div>
+        <details class="hypercare-activity" id="hypercare-activity">
+          <summary>Activity today</summary>
+          <div class="hypercare-activity-feed" id="hypercare-activity-feed"></div>
+        </details>
+        <div class="hypercare-handover" id="hypercare-handover" hidden></div>
+      </div>
+
+      <!-- Top Clients (standalone view) -->
+      <div class="topclients-pane" id="topclients-pane">
+        <div class="overview-header">
+          <div>
+            <h2 class="overview-title">Top Clients</h2>
+            <div class="overview-subtitle" id="topclients-subtitle">Key accounts and their open emails</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="topclients-refresh">↻ Refresh</button>
+        </div>
+        <div class="tc-add" id="tc-add"></div>
+        <div class="tc-list" id="tc-list"></div>
+      </div>
+
+      <!-- Settings (standalone view) -->
+      <div class="settings-pane" id="settings-pane">
+        <div class="overview-header">
+          <div>
+            <h2 class="overview-title">Settings</h2>
+            <div class="overview-subtitle">Saved to the server — changes apply on every device</div>
+          </div>
+        </div>
+        <div class="settings-layout">
+          <nav class="settings-subnav" id="settings-subnav"></nav>
+          <div class="settings-content" id="settings-content"></div>
+        </div>
+      </div>
+
+      <!-- Email list -->
+      <div class="email-list-pane" id="email-list-pane">
+        <div class="pane-header">
+          <span class="pane-title" id="pane-title">Operations</span>
+          <button class="btn btn-secondary btn-sm" id="compose-btn">+ Compose</button>
+        </div>
+        <div class="search-bar">
+          <input type="search" class="search-input" id="search-input" placeholder="Search subject or sender…">
+        </div>
+        <div class="email-list" id="email-list">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Email detail -->
+      <div class="email-detail-pane" id="email-detail-pane">
+        <div class="detail-empty" id="detail-empty">Select an email to read</div>
+        <div class="detail-content" id="detail-content">
+          <div class="detail-header">
+            <div class="detail-subject" id="detail-subject"></div>
+            <div class="detail-meta">
+              <span><strong>From:</strong> <span id="detail-from"></span></span>
+              <span><strong>To:</strong> <span id="detail-to"></span></span>
+              <span id="detail-time"></span>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-primary btn-sm" id="reply-btn">Reply</button>
+            <button class="btn btn-secondary btn-sm" id="mark-read-btn">Mark unread</button>
+            <button class="btn btn-secondary btn-sm" id="back-btn" style="display:none">← Back</button>
+          </div>
+          <div class="detail-body" id="detail-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Compose / Reply Modal ───────────────────────────────────────────────── -->
+<div class="modal-overlay" id="compose-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title">New Message</span>
+      <button class="btn btn-secondary btn-sm" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">From inbox</label>
+        <select class="form-control" id="compose-inbox">
+          <option value="operations">Operations</option>
+          <option value="export">Export</option>
+          <option value="ireland">Ireland</option>
+          <option value="uk">UK</option>
+          <option value="eu">EU</option>
+          <option value="offers">Offers</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">To</label>
+        <input type="email" class="form-control" id="compose-to" placeholder="recipient@example.com">
+      </div>
+      <div class="form-group" id="compose-cc-group">
+        <label class="form-label">CC (optional)</label>
+        <input type="email" class="form-control" id="compose-cc" placeholder="cc@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" class="form-control" id="compose-subject" placeholder="Subject">
+      </div>
+      <div class="form-group" id="compose-query-type-group" hidden>
+        <label class="form-label" for="compose-query-type">Query type</label>
+        <select class="form-control" id="compose-query-type">
+          <option value="">Select query type…</option>
+          <option value="Quote Request">Quote Request</option>
+          <option value="Booking / Load">Booking / Load</option>
+          <option value="Customs / Documentation">Customs / Documentation</option>
+          <option value="Pharma / Temperature Controlled">Pharma / Temperature Controlled</option>
+          <option value="Complaint / Escalation">Complaint / Escalation</option>
+          <option value="Finance / Invoicing">Finance / Invoicing</option>
+          <option value="General Enquiry">General Enquiry</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-control" id="compose-body" placeholder="Write your message…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-send" style="width:auto;padding:10px 24px;">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Drilldown Modal ─────────────────────────────────────────────────────── -->
+<div class="modal-overlay drilldown-overlay" id="drilldown-modal">
+  <div class="modal drilldown-modal">
+    <div class="modal-header">
+      <span id="drilldown-title">Drilldown</span>
+      <button class="btn btn-secondary btn-sm" id="drilldown-close">✕</button>
+    </div>
+    <div class="modal-body drilldown-body" id="drilldown-body">
+      <!-- populated by openDrilldown() -->
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast container ────────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<script src="app.js?v=36"></script>
+</body>
+</html>

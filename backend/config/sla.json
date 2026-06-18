@@ -1,0 +1,15 @@
+{
+  "default_first_response_hours": 4,
+  "thresholds": {
+    "green_max_hours": 2,
+    "amber_max_hours": 4,
+    "red_min_hours": 4
+  },
+  "after_hours": {
+    "start": "18:00",
+    "end": "08:00",
+    "weekends_count_as_after_hours": true
+  },
+  "missed_threshold_hours": 24,
+  "stalled_threshold_hours": 48
+}
