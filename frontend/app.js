@@ -761,7 +761,7 @@ async function runReport() {
     const body = data.byType.map(r =>
       `<tr><td style="${cellL}">${esc(r.queryType)}</td><td style="${cellR}">${r.count}</td></tr>`
     ).join('');
-    reportsSummary.innerHTML =
+    const tableHtml =
       `<table style="width:100%; border-collapse:collapse; font-size:13px;">` +
       `<thead><tr><th style="text-align:left; ${th}">Query type</th>` +
       `<th style="text-align:right; ${th}">Replies</th></tr></thead>` +
@@ -769,6 +769,31 @@ async function runReport() {
       `<tfoot><tr style="border-top:1px solid var(--border-default);">` +
       `<td style="${cellL} font-weight:500;">Total</td>` +
       `<td style="${cellR} font-weight:500;">${data.total}</td></tr></tfoot></table>`;
+
+    // Reply list: the individual replies behind the counts, newest first.
+    const rows = data.rows || [];
+    const MAX = 100;
+    const items = rows.slice(0, MAX).map(r => {
+      let d = {};
+      try { d = r.detail ? JSON.parse(r.detail) : {}; } catch { /* leave d empty */ }
+      const when = new Date(r.ts).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const subject = d.subject || '(no subject)';
+      const meta = [r.user, d.inbox, r.queryType, r.jobNumber].filter(Boolean).map(esc).join(' · ');
+      return `<div style="padding:8px 10px; border-bottom:1px solid var(--border-subtle);">
+        <div style="font-size:13px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(subject)}</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(when)} · ${meta}</div>
+      </div>`;
+    }).join('');
+    const moreNote = rows.length > MAX
+      ? `<p class="form-label" style="margin-top:8px;">Showing the most recent ${MAX}. Download CSV for all ${data.total}.</p>`
+      : '';
+    const listHtml = `<div style="margin-top:18px;">
+      <p class="form-label" style="margin-bottom:6px;">Replies (newest first)</p>
+      <div style="max-height:280px; overflow-y:auto; border:1px solid var(--border-default); border-radius:6px;">${items}</div>
+      ${moreNote}
+    </div>`;
+
+    reportsSummary.innerHTML = tableHtml + listHtml;
   } catch (err) {
     reportsSummary.innerHTML =
       `<p class="form-label" style="color:var(--status-danger);">Couldn’t load report: ${esc(err.message)}</p>`;
