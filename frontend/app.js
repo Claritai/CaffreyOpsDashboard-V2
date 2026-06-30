@@ -95,6 +95,7 @@ const reportsModal   = $('reports-modal');
 const reportsFrom    = $('reports-from');
 const reportsTo      = $('reports-to');
 const reportsType    = $('reports-type');
+const reportsJob     = $('reports-job');
 const reportsRun     = $('reports-run');
 const reportsClose   = $('reports-close');
 const reportsCancel  = $('reports-cancel');
@@ -670,6 +671,12 @@ modalSend.addEventListener('click', async () => {
     return;
   }
 
+  if (isReply && !jobNumber) {
+    toast('Please enter a job number for this reply.', 'error');
+    composeJobNumber.focus();
+    return;
+  }
+
   modalSend.disabled = true;
   modalSend.textContent = 'Sending…';
 
@@ -705,6 +712,7 @@ function reportsRangeQuery() {
   if (reportsFrom.value) qs.set('from', `${reportsFrom.value}T00:00:00.000Z`);
   if (reportsTo.value)   qs.set('to',   `${reportsTo.value}T23:59:59.999Z`);
   if (reportsType.value) qs.set('queryType', reportsType.value);
+  if (reportsJob.value.trim()) qs.set('jobNumber', reportsJob.value.trim());
   const s = qs.toString();
   return s ? `?${s}` : '';
 }
@@ -730,6 +738,7 @@ function openReports() {
   const iso = d => d.toISOString().slice(0, 10);
   reportsFrom.value = iso(new Date(now.getFullYear(), now.getMonth(), 1));
   reportsTo.value = iso(now);
+  reportsJob.value = '';
   reportsModal.classList.add('visible');
   runReport();
 }
@@ -774,6 +783,7 @@ function downloadReportCsv() {
 
 reportsRun.addEventListener('click', runReport);
 reportsType.addEventListener('change', runReport);
+reportsJob.addEventListener('keydown', e => { if (e.key === 'Enter') runReport(); });
 reportsDownload.addEventListener('click', downloadReportCsv);
 reportsClose.addEventListener('click', closeReports);
 reportsCancel.addEventListener('click', closeReports);

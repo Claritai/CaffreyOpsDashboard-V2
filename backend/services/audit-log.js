@@ -94,7 +94,7 @@ function record(event, { user, ip, detail, queryType, jobNumber } = {}) {
  * `from`/`to` are optional ISO timestamps (inclusive). Returns the per-type
  * counts, the grand total, and the underlying tagged sends (capped) for export.
  */
-function queryTypeReport({ from, to, queryType } = {}) {
+function queryTypeReport({ from, to, queryType, jobNumber } = {}) {
   openDb();
   // Always bind both bounds so the prepared statement parameter set is stable
   // (better-sqlite3 dislikes optional named params).
@@ -106,6 +106,11 @@ function queryTypeReport({ from, to, queryType } = {}) {
   if (queryType) {
     where += ' AND query_type = @queryType';
     params.queryType = queryType;
+  }
+  // Optional job-number filter (case-insensitive exact match). Empty/absent = all jobs.
+  if (jobNumber && String(jobNumber).trim()) {
+    where += ' AND job_number = @jobNumber COLLATE NOCASE';
+    params.jobNumber = String(jobNumber).trim();
   }
 
   const byType = db.prepare(

@@ -291,15 +291,15 @@ app.delete('/api/reply-templates/:name', requireAuth, csrfProtect, apiLimiter, (
 // ── Query-type reporting (read-only, for the Reports panel) ──────────────────
 app.get('/api/reports/query-types', requireAuth, apiLimiter, (req, res, next) => {
   try {
-    const { from, to, queryType } = req.query;
-    res.json(auditLog.queryTypeReport({ from, to, queryType }));
+    const { from, to, queryType, jobNumber } = req.query;
+    res.json(auditLog.queryTypeReport({ from, to, queryType, jobNumber }));
   } catch (err) { next(err); }
 });
 
 app.get('/api/reports/query-types.csv', requireAuth, apiLimiter, (req, res, next) => {
   try {
-    const { from, to, queryType } = req.query;
-    const csv = auditLog.queryTypeReportCsv({ from, to, queryType });
+    const { from, to, queryType, jobNumber } = req.query;
+    const csv = auditLog.queryTypeReportCsv({ from, to, queryType, jobNumber });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="query-type-report.csv"');
     res.send(csv);
