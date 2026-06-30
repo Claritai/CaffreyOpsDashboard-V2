@@ -570,12 +570,45 @@ body.demo-mode .content-area::before {
   box-shadow: 0 4px 16px rgba(239, 159, 39, 0.08);
 }
 .client-card.red {
-  border-color: rgba(226, 75, 74, 0.50);
+  border-color: var(--status-danger);
   background:
     linear-gradient(135deg, rgba(226, 75, 74, 0.15), rgba(226, 75, 74, 0.03) 70%),
     var(--surface-grad);
-  box-shadow: 0 4px 16px rgba(226, 75, 74, 0.08);
+  box-shadow: 0 0 0 1px rgba(226, 75, 74, 0.55), 0 0 16px -2px rgba(226, 75, 74, 0.45);
+  animation: breachPulse 2.4s ease-in-out infinite;
 }
+@keyframes breachPulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(226, 75, 74, 0.50), 0 0 13px -3px rgba(226, 75, 74, 0.38); }
+  50%      { box-shadow: 0 0 0 1px rgba(226, 75, 74, 0.80), 0 0 22px -1px rgba(226, 75, 74, 0.62); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .client-card.red { animation: none; }
+}
+
+/* Today's pulse one-liner under the page title. */
+.overview-pulse {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-secondary, #9fb3c8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: center;
+}
+.overview-pulse .pulse-sep { color: var(--text-muted); opacity: 0.6; }
+.overview-pulse .pulse-alert { color: var(--status-danger); font-weight: 600; }
+.overview-pulse .pulse-ok { color: var(--success); }
+
+/* Top Query Types tile */
+.tile .tile-sub { font-size: 11px; color: var(--text-muted); }
+.qtype-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.qtype-row { transition: opacity 0.15s; }
+.qtype-row:hover { opacity: 0.85; }
+.qtype-row-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.qtype-name { font-size: 13px; color: var(--text-primary); }
+.qtype-count { font-size: 13px; font-weight: 600; color: var(--brand-cream); }
+.qtype-bar { height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 3px; overflow: hidden; }
+.qtype-bar-fill { height: 100%; background: var(--brand-cyan); border-radius: 3px; }
 
 .client-card.clickable { cursor: pointer; }
 .client-card.clickable:hover {

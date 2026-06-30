@@ -124,6 +124,8 @@ const statTotalUnread = $('stat-total-unread');
 const lastRefreshLabel = $('last-refresh-label');
 const contentArea       = document.querySelector('.content-area');
 const overviewGrid      = $('overview-grid');
+const overviewGrid2     = $('overview-grid-2');
+const overviewPulse     = $('overview-pulse');
 const overviewSubtitle  = $('overview-subtitle');
 const overviewRefresh   = $('overview-refresh');
 const criticalRow       = $('critical-row');
@@ -352,6 +354,7 @@ async function loadStats() {
   try {
     const data = await apiFetch('/api/dashboard/stats');
     statTotalUnread.textContent = data.totalUnread ?? '—';
+    if (data.totalUnread != null) updatePulse({ unread: data.totalUnread });
     for (const [key, count] of Object.entries(data.unread || {})) {
       const badge = $(`badge-${key}`);
       if (badge) {
@@ -1010,6 +1013,72 @@ function showTopClients() {
 
 // ── Overview loading + rendering ─────────────────────────────────────────────
 
+// ── Today's pulse one-liner ───────────────────────────────────────────────────
+// Assembled from several widgets that load independently; each calls
+// updatePulse() with its slice and the line re-renders with whatever is known.
+const pulse = {};
+function updatePulse(partial) {
+  Object.assign(pulse, partial);
+  renderPulse();
+}
+function renderPulse() {
+  if (!overviewPulse) return;
+  const parts = [];
+  if (pulse.unread != null) parts.push(`<span>${pulse.unread} unread</span>`);
+  if (pulse.missed != null) {
+    parts.push(pulse.missed > 0
+      ? `<span class="pulse-alert">${pulse.missed} missed</span>`
+      : `<span class="pulse-ok">0 missed</span>`);
+  }
+  if (pulse.breached != null) {
+    parts.push(pulse.breached > 0
+      ? `<span class="pulse-alert">${pulse.breached} client${pulse.breached > 1 ? 's' : ''} breached</span>`
+      : `<span class="pulse-ok">clients all green</span>`);
+  }
+  if (pulse.avgReplyMin != null) parts.push(`<span>avg reply ${esc(formatPerfMinutes(pulse.avgReplyMin))}</span>`);
+  overviewPulse.innerHTML = parts.join('<span class="pulse-sep">·</span>');
+}
+
+// ── Top Query Types (last 7 days) tile ────────────────────────────────────────
+async function loadTopQueryTypes() {
+  if (!overviewGrid2) return;
+  overviewGrid2.innerHTML = `<div class="tile"><div class="tile-head"><span class="tile-label">Top Query Types (7d)</span></div>
+    <div class="skeleton skel-line w60" style="margin-top:10px;"></div></div>`;
+  const from = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  try {
+    const data = await apiFetch(`/api/reports/query-types?from=${encodeURIComponent(from)}`);
+    const types = (data.byType || []).slice(0, 5);
+    let bodyHtml;
+    if (!types.length) {
+      bodyHtml = `<div class="tile-stat empty">No tagged replies this week yet</div>`;
+    } else {
+      const max = types[0].count || 1;
+      bodyHtml = `<div class="qtype-list">` + types.map(t => {
+        const pct = Math.max(6, Math.round((t.count / max) * 100));
+        return `<div class="qtype-row" data-qtype="${esc(t.queryType)}" title="Open this type in Reports">
+          <div class="qtype-row-top"><span class="qtype-name">${esc(t.queryType)}</span><span class="qtype-count">${t.count}</span></div>
+          <div class="qtype-bar"><div class="qtype-bar-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('') + `</div>`;
+    }
+    overviewGrid2.innerHTML = `<div class="tile">
+      <div class="tile-head"><span class="tile-label">Top Query Types (7d)</span>
+        <span class="tile-sub">${data.total || 0} replies</span></div>
+      ${bodyHtml}
+    </div>`;
+    overviewGrid2.querySelectorAll('.qtype-row[data-qtype]').forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => {
+        openReports();
+        reportsType.value = el.dataset.qtype;
+        runReport();
+      });
+    });
+  } catch (err) {
+    overviewGrid2.innerHTML = `<div class="tile inline-error" style="text-align:center;">Failed to load query types: ${formatErrorMessage(err)}</div>`;
+  }
+}
+
 async function loadOverview(force = false) {
   renderOverviewSkeleton();
   renderCriticalSkeleton();
@@ -1019,6 +1088,7 @@ async function loadOverview(force = false) {
   loadCategories(force);
   loadPerformance(force);
   loadMissed(force);
+  loadTopQueryTypes(force);
   try {
     const data = await apiFetch(withForce('/api/dashboard/overview', force));
     renderOverview(data);
@@ -1078,6 +1148,7 @@ const GREEN_COLLAPSE_THRESHOLD = 5;
 function renderClientHealthGrid(data) {
   const clients = data.clients || [];
   const summary = data.summary || { green: 0, amber: 0, red: 0 };
+  updatePulse({ breached: summary.red || 0 });
 
   const red    = clients.filter(c => c.status === 'red');
   const amber  = clients.filter(c => c.status === 'amber');
@@ -1257,6 +1328,7 @@ function renderPerformanceSkeleton() {
 }
 
 function renderPerformance(d) {
+  updatePulse({ avgReplyMin: (d.avg_response_time && d.avg_response_time.today_minutes != null) ? d.avg_response_time.today_minutes : undefined });
   const cards = [
     perfAvgResponseCard(d.avg_response_time),
     perfFirstReplyCard(d.first_response_rate),
@@ -1494,6 +1566,7 @@ function renderMissedSkeleton() {
 
 function renderMissed(d) {
   const total = d.total_missed || 0;
+  updatePulse({ missed: total });
   if (total === 0) {
     missedRow.innerHTML = `<div class="missed-card pill green">
       <span class="pill-icon">✓</span>
