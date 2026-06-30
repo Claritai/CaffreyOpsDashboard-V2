@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=33">
+  <link rel="stylesheet" href="styles.css?v=34">
 </head>
 <body>
 
@@ -38,6 +38,10 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <img src="caffrey-logo.png?v=1" alt="Caffrey International" class="brand-logo">
+        <div class="sidebar-clock" id="sidebar-clock">
+          <span class="sidebar-clock-time" id="sidebar-clock-time">--:--</span>
+          <span class="sidebar-clock-date" id="sidebar-clock-date"></span>
+        </div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Dashboard</div>
@@ -302,6 +306,10 @@
           <option value="General Enquiry">General Enquiry</option>
         </select>
       </div>
+      <div class="form-group" id="compose-job-group" hidden>
+        <label class="form-label" for="compose-job-number">Job number</label>
+        <input type="text" class="form-control" id="compose-job-number" placeholder="e.g. J-10421 (optional)" maxlength="60">
+      </div>
       <div class="form-group" id="compose-template-group" hidden>
         <label class="form-label" for="compose-template">Canned responses</label>
         <select class="form-control" id="compose-template">
@@ -399,6 +407,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=41"></script>
+<script src="app.js?v=43"></script>
 </body>
 </html>

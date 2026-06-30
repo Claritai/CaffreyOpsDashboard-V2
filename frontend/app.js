@@ -116,6 +116,8 @@ const composeQueryType      = $('compose-query-type');
 const composeQueryTypeGroup = $('compose-query-type-group');
 const composeTemplate       = $('compose-template');
 const composeTemplateGroup  = $('compose-template-group');
+const composeJobNumber      = $('compose-job-number');
+const composeJobGroup       = $('compose-job-group');
 const composeBody   = $('compose-body');
 const statTotalUnread = $('stat-total-unread');
 const lastRefreshLabel = $('last-refresh-label');
@@ -564,6 +566,8 @@ function openCompose(opts = {}) {
   // Query type + canned responses are only relevant when replying.
   composeQueryTypeGroup.hidden = !opts.reply;
   composeQueryType.value = '';
+  composeJobGroup.hidden = !opts.reply;
+  composeJobNumber.value = '';
   composeTemplateGroup.hidden = !opts.reply;
   composeTemplate.value = '';
   if (opts.reply) populateTemplateDropdown();
@@ -591,6 +595,8 @@ function closeCompose() {
   composeCc.value = '';
   composeQueryType.value = '';
   composeQueryTypeGroup.hidden = true;
+  composeJobNumber.value = '';
+  composeJobGroup.hidden = true;
   composeTemplate.value = '';
   composeTemplateGroup.hidden = true;
 }
@@ -651,6 +657,7 @@ modalSend.addEventListener('click', async () => {
   const inbox = composeInbox.value;
   const isReply = !composeQueryTypeGroup.hidden;
   const queryType = composeQueryType.value;
+  const jobNumber = composeJobNumber.value.trim();
 
   if (!to || !subject || !body) {
     toast('Please fill in To, Subject, and Message.', 'error');
@@ -677,10 +684,10 @@ modalSend.addEventListener('click', async () => {
     await apiFetch('/api/emails/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // queryType is null for new messages; backend can log/store it later.
-      body: JSON.stringify({ inbox, message, queryType: queryType || null }),
+      // queryType/jobNumber are null for new messages.
+      body: JSON.stringify({ inbox, message, queryType: queryType || null, jobNumber: jobNumber || null }),
     });
-    toast(queryType ? `Reply sent · tagged “${queryType}”.` : 'Message sent.', 'success');
+    toast(queryType ? `Reply sent · tagged “${queryType}”${jobNumber ? ` · job ${jobNumber}` : ''}.` : 'Message sent.', 'success');
     closeCompose();
   } catch (err) {
     errorToast('Send failed', err);
@@ -3386,5 +3393,20 @@ function microsoftIcon() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+
+// Live date/time under the sidebar logo.
+function startSidebarClock() {
+  const timeEl = document.getElementById('sidebar-clock-time');
+  const dateEl = document.getElementById('sidebar-clock-date');
+  if (!timeEl || !dateEl) return;
+  function tick() {
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    dateEl.textContent = now.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+  tick();
+  setInterval(tick, 15_000); // minute-resolution display; refresh often enough to stay accurate
+}
+startSidebarClock();
 
 checkAuth();

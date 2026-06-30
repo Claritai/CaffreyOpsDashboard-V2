@@ -53,9 +53,13 @@ function openDb() {
   if (!cols.includes('query_type')) {
     db.exec('ALTER TABLE audit_log ADD COLUMN query_type TEXT');
   }
+  if (!cols.includes('job_number')) {
+    db.exec('ALTER TABLE audit_log ADD COLUMN job_number TEXT');
+  }
   db.exec('CREATE INDEX IF NOT EXISTS idx_audit_log_query_type ON audit_log(query_type)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_audit_log_job_number ON audit_log(job_number)');
   insertStmt = db.prepare(
-    'INSERT INTO audit_log (ts, event, user, ip, detail, query_type) VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO audit_log (ts, event, user, ip, detail, query_type, job_number) VALUES (?, ?, ?, ?, ?, ?, ?)'
   );
   return db;
 }
@@ -70,7 +74,7 @@ function openDb() {
  * @param {string} [fields.ip]     - source IP (typically req.ip; trust proxy is set)
  * @param {object|string} [fields.detail] - extra context (object is JSON-stringified, capped at 2KB)
  */
-function record(event, { user, ip, detail, queryType } = {}) {
+function record(event, { user, ip, detail, queryType, jobNumber } = {}) {
   try {
     openDb();
     let detailStr = null;
@@ -78,7 +82,7 @@ function record(event, { user, ip, detail, queryType } = {}) {
       detailStr = typeof detail === 'string' ? detail : JSON.stringify(detail);
       if (detailStr.length > 2048) detailStr = detailStr.slice(0, 2045) + '...';
     }
-    insertStmt.run(new Date().toISOString(), event, user || null, ip || null, detailStr, queryType || null);
+    insertStmt.run(new Date().toISOString(), event, user || null, ip || null, detailStr, queryType || null, jobNumber || null);
   } catch (e) {
     console.error('[audit] failed to record', event, e.message);
   }
@@ -113,7 +117,7 @@ function queryTypeReport({ from, to, queryType } = {}) {
   const total = byType.reduce((s, r) => s + r.count, 0);
 
   const rows = db.prepare(
-    `SELECT ts, user, query_type AS queryType, detail
+    `SELECT ts, user, query_type AS queryType, job_number AS jobNumber, detail
        FROM audit_log WHERE ${where}
        ORDER BY ts DESC LIMIT 5000`
   ).all(params);
@@ -130,13 +134,13 @@ function csvCell(v) {
 /** Build a CSV (one row per tagged send) for download. */
 function queryTypeReportCsv(opts) {
   const { rows } = queryTypeReport(opts);
-  const header = ['Timestamp', 'User', 'Query Type', 'Inbox', 'Recipients', 'Subject'];
+  const header = ['Timestamp', 'User', 'Query Type', 'Job Number', 'Inbox', 'Recipients', 'Subject'];
   const lines = [header.join(',')];
   for (const r of rows) {
     let d = {};
     try { d = r.detail ? JSON.parse(r.detail) : {}; } catch { /* leave d empty */ }
     lines.push([
-      r.ts, r.user, r.queryType, d.inbox,
+      r.ts, r.user, r.queryType, r.jobNumber, d.inbox,
       Array.isArray(d.recipients) ? d.recipients.join('; ') : '',
       d.subject,
     ].map(csvCell).join(','));

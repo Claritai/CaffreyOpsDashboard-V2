@@ -301,16 +301,36 @@ body.demo-mode .content-area::before {
 
 .sidebar-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 14px 12px;
+  gap: 8px;
+  padding: 18px 12px 14px;
   border-bottom: 1px solid var(--border-subtle);
 }
 .brand-logo {
-  height: 32px;
+  height: 56px;
   width: auto;
   display: block;
   object-fit: contain;
+}
+.sidebar-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.25;
+}
+.sidebar-clock-time {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+.sidebar-clock-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
 .sidebar-section { padding: 16px 10px 8px; }

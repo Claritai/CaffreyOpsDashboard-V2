@@ -247,7 +247,7 @@ app.get('/api/emails/:inbox/:id', requireAuth, apiLimiter, async (req, res, next
 
 app.post('/api/emails/send', requireAuth, csrfProtect, sendLimiter, apiLimiter, async (req, res, next) => {
   try {
-    const { inbox, message, queryType } = req.body;
+    const { inbox, message, queryType, jobNumber } = req.body;
     if (!inbox || !message) return res.status(400).json({ error: 'inbox and message are required' });
     await sendMessage(req.session, inbox, { message });
     // GDPR: logs sender inbox, recipients, and subject. Drop `subject` here
@@ -259,7 +259,8 @@ app.post('/api/emails/send', requireAuth, csrfProtect, sendLimiter, apiLimiter, 
       user: req.session.user && req.session.user.email,
       ip: req.ip,
       queryType: typeof queryType === 'string' ? queryType : null,
-      detail: { inbox, recipients, subject: message.subject || null, queryType: queryType || null },
+      jobNumber: typeof jobNumber === 'string' && jobNumber.trim() ? jobNumber.trim() : null,
+      detail: { inbox, recipients, subject: message.subject || null, queryType: queryType || null, jobNumber: jobNumber || null },
     });
     res.json({ ok: true });
   } catch (err) { next(err); }
