@@ -109,6 +109,14 @@ const cannedBody     = $('canned-body');
 const cannedClear    = $('canned-clear');
 const cannedSave     = $('canned-save');
 const cannedFormTitle = $('canned-form-title');
+const supportModal    = $('support-modal');
+const supportClose    = $('support-close');
+const supportCancel   = $('support-cancel');
+const supportSend     = $('support-send');
+const supportSubject  = $('support-subject');
+const supportCategory = $('support-category');
+const supportPriority = $('support-priority');
+const supportMessage  = $('support-message');
 const composeInbox  = $('compose-inbox');
 const composeTo     = $('compose-to');
 const composeCc     = $('compose-cc');
@@ -921,6 +929,54 @@ cannedClear.addEventListener('click', resetCannedForm);
 cannedClose.addEventListener('click', closeCannedManager);
 cannedModal.addEventListener('click', e => { if (e.target === cannedModal) closeCannedManager(); });
 
+// ── Support tickets ───────────────────────────────────────────────────────────
+function openSupport() {
+  supportSubject.value = '';
+  supportCategory.value = 'Question';
+  supportPriority.value = 'Normal';
+  supportMessage.value = '';
+  supportModal.classList.add('visible');
+  supportSubject.focus();
+}
+function closeSupport() {
+  supportModal.classList.remove('visible');
+}
+
+async function submitSupport() {
+  const subject = supportSubject.value.trim();
+  const message = supportMessage.value.trim();
+  if (!subject || !message) {
+    toast('Please add a subject and description.', 'error');
+    return;
+  }
+  supportSend.disabled = true;
+  supportSend.textContent = 'Sending…';
+  try {
+    const resp = await apiFetch('/api/support', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject,
+        message,
+        category: supportCategory.value,
+        priority: supportPriority.value,
+      }),
+    });
+    toast(resp && resp.demo ? 'Demo: support ticket not actually sent.' : 'Support ticket sent — a copy is in your inbox.', 'success');
+    closeSupport();
+  } catch (err) {
+    errorToast('Couldn’t send ticket', err);
+  } finally {
+    supportSend.disabled = false;
+    supportSend.textContent = 'Send ticket';
+  }
+}
+
+supportSend.addEventListener('click', submitSupport);
+supportClose.addEventListener('click', closeSupport);
+supportCancel.addEventListener('click', closeSupport);
+supportModal.addEventListener('click', e => { if (e.target === supportModal) closeSupport(); });
+
 // ── Sidebar navigation ────────────────────────────────────────────────────────
 
 document.querySelectorAll('.inbox-item').forEach(el => {
@@ -930,6 +986,7 @@ document.querySelectorAll('.inbox-item').forEach(el => {
     if (el.dataset.view === 'topclients') { showTopClients(); return; }
     if (el.dataset.view === 'reports') { openReports(); return; }
     if (el.dataset.view === 'canned') { openCannedManager(); return; }
+    if (el.dataset.view === 'support') { openSupport(); return; }
     if (el.dataset.view === 'settings') { showSettings(); return; }
     const key = el.dataset.inbox;
     if (key) {

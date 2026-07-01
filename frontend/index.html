@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=36">
+  <link rel="stylesheet" href="styles.css?v=37">
 </head>
 <body>
 
@@ -135,6 +135,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
           </span>
           <span class="inbox-name">Settings</span>
+        </div>
+        <div class="inbox-item" data-view="support">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide LifeBuoy -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="9.17" y1="14.83" x2="4.93" y2="19.07"/></svg>
+          </span>
+          <span class="inbox-name">Support</span>
         </div>
       </div>
 
@@ -397,6 +404,51 @@
   </div>
 </div>
 
+<!-- ── Support Modal ───────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="support-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>Lodge a Support Ticket</span>
+      <button class="btn btn-secondary btn-sm" id="support-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="form-label" style="margin-bottom:12px;">Sent to the Claritai support team. They'll reply to your email address.</p>
+      <div class="form-group">
+        <label class="form-label" for="support-subject">Subject</label>
+        <input type="text" class="form-control" id="support-subject" placeholder="Brief summary of the issue" maxlength="120">
+      </div>
+      <div class="form-group" style="display:flex; gap:12px;">
+        <div style="flex:1;">
+          <label class="form-label" for="support-category">Category</label>
+          <select class="form-control" id="support-category">
+            <option value="Question">Question / How-to</option>
+            <option value="Bug">Something's broken</option>
+            <option value="Feature request">Feature request</option>
+            <option value="Data issue">Data looks wrong</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label class="form-label" for="support-priority">Priority</label>
+          <select class="form-control" id="support-priority">
+            <option value="Low">Low</option>
+            <option value="Normal" selected>Normal</option>
+            <option value="High">High — blocking work</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="support-message">Description</label>
+        <textarea class="form-control" id="support-message" placeholder="What happened? What were you trying to do? Include anything that helps us reproduce it."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="support-cancel">Cancel</button>
+      <button class="btn btn-primary" id="support-send" style="width:auto; padding:10px 24px;">Send ticket</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Drilldown Modal ─────────────────────────────────────────────────────── -->
 <div class="modal-overlay drilldown-overlay" id="drilldown-modal">
   <div class="modal drilldown-modal">
@@ -413,6 +465,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=48"></script>
+<script src="app.js?v=50"></script>
 </body>
 </html>

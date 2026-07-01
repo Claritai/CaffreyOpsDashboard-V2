@@ -288,6 +288,57 @@ app.delete('/api/reply-templates/:name', requireAuth, csrfProtect, apiLimiter, (
   } catch (err) { next(err); }
 });
 
+// ── Support tickets (emailed to Claritai) ────────────────────────────────────
+const SUPPORT_TO = 'info@claritai.ie';
+const SUPPORT_FROM_INBOX = 'operations'; // shared mailbox the ticket is sent from
+
+app.post('/api/support', requireAuth, csrfProtect, apiLimiter, async (req, res, next) => {
+  try {
+    const subject = (req.body.subject || '').trim();
+    const messageText = (req.body.message || '').trim();
+    const category = (req.body.category || 'General').toString().slice(0, 60);
+    const priority = (req.body.priority || 'Normal').toString().slice(0, 20);
+    if (!subject || !messageText) {
+      return res.status(400).json({ error: 'Subject and description are required' });
+    }
+    const user = req.session.user || {};
+    const bodyText = [
+      'Support ticket raised from the Caffrey Ops Dashboard.',
+      '',
+      `Raised by: ${user.name || 'Unknown'} <${user.email || 'unknown'}>`,
+      `When: ${new Date().toISOString()}`,
+      `Category: ${category}`,
+      `Priority: ${priority}`,
+      '',
+      `Subject: ${subject}`,
+      '',
+      messageText,
+    ].join('\n');
+
+    const graphMessage = {
+      subject: `[Caffrey Ops Support] ${subject}`,
+      body: { contentType: 'Text', content: bodyText },
+      toRecipients: [{ emailAddress: { address: SUPPORT_TO } }],
+    };
+    // CC the person who raised it so they get their own confirmation copy,
+    // and set reply-to so Claritai's reply reaches them directly.
+    if (user.email) {
+      graphMessage.ccRecipients = [{ emailAddress: { address: user.email } }];
+      graphMessage.replyTo = [{ emailAddress: { address: user.email } }];
+    }
+
+    auditLog.record('support_ticket', {
+      user: user.email, ip: req.ip,
+      detail: { subject, category, priority },
+    });
+
+    if (isDemoMode(req)) return res.json({ ok: true, demo: true });
+
+    await sendMessage(req.session, SUPPORT_FROM_INBOX, { message: graphMessage });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
 // ── Query-type reporting (read-only, for the Reports panel) ──────────────────
 app.get('/api/reports/query-types', requireAuth, apiLimiter, (req, res, next) => {
   try {
