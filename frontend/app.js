@@ -128,6 +128,11 @@ const composeTemplateGroup  = $('compose-template-group');
 const composeJobNumber      = $('compose-job-number');
 const composeJobGroup       = $('compose-job-group');
 const composeBody   = $('compose-body');
+// Message box is now a contenteditable rich-text editor (HTML email body).
+function textToHtml(str) { return esc(str || '').replace(/\n/g, '<br>'); }
+function getBodyText() { return (composeBody.innerText || '').replace(/\u00a0/g, ' '); }
+function getBodyHtml() { return composeBody.innerHTML || ''; }
+function setBodyText(str) { composeBody.innerHTML = str ? textToHtml(str) : ''; }
 const statTotalUnread = $('stat-total-unread');
 const lastRefreshLabel = $('last-refresh-label');
 const contentArea       = document.querySelector('.content-area');
@@ -574,7 +579,7 @@ function openCompose(opts = {}) {
   composeInbox.value = state.activeInbox;
   composeTo.value = opts.to || '';
   composeSubject.value = opts.subject || '';
-  composeBody.value = opts.body || '';
+  setBodyText(opts.body || '');
   // Query type + canned responses are only relevant when replying.
   composeQueryTypeGroup.hidden = !opts.reply;
   composeQueryType.value = '';
@@ -603,7 +608,7 @@ function closeCompose() {
   composeModal.classList.remove('visible');
   composeTo.value = '';
   composeSubject.value = '';
-  composeBody.value = '';
+  composeBody.innerHTML = '';
   composeCc.value = '';
   composeQueryType.value = '';
   composeQueryTypeGroup.hidden = true;
@@ -649,29 +654,73 @@ composeTemplate.addEventListener('change', async () => {
   const templates = await ensureReplyTemplates();
   const tpl = templates[name];
   if (tpl) {
-    const current = composeBody.value.trim();
+    const current = getBodyText().trim();
     if (current && current !== tpl.trim() && !confirm(`Replace the current message with the “${name}” response?`)) {
       composeTemplate.value = '';
       return;
     }
-    composeBody.value = tpl;
+    setBodyText(tpl);
     composeBody.focus();
   }
   composeTemplate.value = ''; // reset to the placeholder after inserting
 });
 composeModal.addEventListener('click', e => { if (e.target === composeModal) closeCompose(); });
 
+// ── Rich-text toolbar for the message editor ─────────────────────────────────
+const rteFont = $('rte-font');
+const rteSize = $('rte-size');
+const composeToolbar = $('compose-toolbar');
+let rteSavedRange = null;
+function rteSaveRange() {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount && composeBody.contains(sel.anchorNode)) rteSavedRange = sel.getRangeAt(0);
+}
+function rteRestoreRange() {
+  if (!rteSavedRange) { composeBody.focus(); return; }
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(rteSavedRange);
+}
+composeBody.addEventListener('keyup', rteSaveRange);
+composeBody.addEventListener('mouseup', rteSaveRange);
+composeBody.addEventListener('focus', rteSaveRange);
+// Format buttons: mousedown + preventDefault keeps the selection in the editor.
+if (composeToolbar) {
+  composeToolbar.querySelectorAll('.rte-btn[data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      document.execCommand(btn.dataset.cmd, false, null);
+      rteSaveRange();
+    });
+  });
+  rteFont.addEventListener('change', () => {
+    if (!rteFont.value) return;
+    rteRestoreRange();
+    document.execCommand('fontName', false, rteFont.value);
+    rteSaveRange();
+    rteFont.selectedIndex = 0;
+  });
+  rteSize.addEventListener('change', () => {
+    if (!rteSize.value) return;
+    rteRestoreRange();
+    document.execCommand('fontSize', false, rteSize.value);
+    rteSaveRange();
+    rteSize.selectedIndex = 0;
+  });
+}
+
 modalSend.addEventListener('click', async () => {
   const to = composeTo.value.trim();
   const subject = composeSubject.value.trim();
-  const body = composeBody.value.trim();
+  const bodyText = getBodyText().trim();
+  const bodyHtml = getBodyHtml();
   const cc = composeCc.value.trim();
   const inbox = composeInbox.value;
   const isReply = !composeQueryTypeGroup.hidden;
   const queryType = composeQueryType.value;
   const jobNumber = composeJobNumber.value.trim();
 
-  if (!to || !subject || !body) {
+  if (!to || !subject || !bodyText) {
     toast('Please fill in To, Subject, and Message.', 'error');
     return;
   }
@@ -693,7 +742,7 @@ modalSend.addEventListener('click', async () => {
 
   const message = {
     subject,
-    body: { contentType: 'Text', content: body },
+    body: { contentType: 'HTML', content: bodyHtml },
     toRecipients: [{ emailAddress: { address: to } }],
     ccRecipients: cc ? [{ emailAddress: { address: cc } }] : [],
   };

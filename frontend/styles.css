@@ -1562,6 +1562,30 @@ body.demo-mode .content-area::before {
 
 textarea.form-control { resize: vertical; min-height: 180px; }
 
+/* Rich-text message editor + toolbar */
+.rte-toolbar {
+  display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  padding: 6px;
+  background: #eef1f4; border: 1px solid var(--border); border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+.rte-btn {
+  min-width: 30px; height: 28px; padding: 0 8px;
+  background: #fff; border: 1px solid #cfd6dd; border-radius: 4px;
+  color: #0A1B3D; cursor: pointer; font-size: 13px; line-height: 1;
+}
+.rte-btn:hover { background: #dfe6ec; }
+.rte-select {
+  height: 28px; border: 1px solid #cfd6dd; border-radius: 4px;
+  background: #fff; color: #0A1B3D; font-size: 12px; padding: 0 4px; cursor: pointer;
+}
+.rte-editor {
+  min-height: 180px; max-height: 340px; overflow-y: auto;
+  border-radius: 0 0 6px 6px; resize: vertical;
+}
+.rte-editor:focus { outline: none; border-color: var(--brand-cyan); }
+.rte-editor:empty:before { content: attr(data-placeholder); color: #6b7280; }
+
 /* All inputs in the compose/reply modal are white for readability. */
 #compose-modal .form-control,
 #canned-modal .form-control,
