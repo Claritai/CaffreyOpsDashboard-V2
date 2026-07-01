@@ -74,6 +74,12 @@ async function getPerformance(session) {
   let monthResponses_count = 0, monthResponses_ms = 0;
   let todayReceived = 0, todayRespondedInSla = 0;
 
+  // Per-day accumulators for the last 7 days (index 0 = today … 6 = six days ago),
+  // used to build sparkline series. Uses the same London day boundary as "today".
+  const SPARK_DAYS = 7;
+  const perDay = Array.from({ length: SPARK_DAYS }, () => ({ resp_ms: 0, resp_count: 0, received: 0, in_sla: 0 }));
+  const dayIndexOf = (ms) => (ms >= startOfTodayMs ? 0 : 1 + Math.floor((startOfTodayMs - ms - 1) / DAY_MS));
+
   for (const inboxKey of INBOX_KEYS) {
     const inbox = byInbox[inboxKey].inbox || [];
     const sent  = byInbox[inboxKey].sent  || [];
@@ -111,6 +117,19 @@ async function getPerformance(session) {
         }
       }
       if (isToday) perInbox[inboxKey].today_received++;
+
+      // Per-day sparkline buckets (last 7 days).
+      const di = dayIndexOf(receivedMs);
+      if (di >= 0 && di < SPARK_DAYS) {
+        const pd = perDay[di];
+        pd.received++;
+        if (firstReply) {
+          const dMs2 = firstReply.ts - receivedMs;
+          pd.resp_ms += dMs2;
+          pd.resp_count++;
+          if (dMs2 <= slaMs) pd.in_sla++;
+        }
+      }
     }
   }
 
@@ -146,17 +165,28 @@ async function getPerformance(session) {
     };
   }
 
+  // Build sparkline series, oldest → newest (6 days ago … today).
+  const respSeries = [];
+  const frrSeries = [];
+  for (let i = SPARK_DAYS - 1; i >= 0; i--) {
+    const pd = perDay[i];
+    respSeries.push(pd.resp_count > 0 ? Math.round((pd.resp_ms / pd.resp_count / 60000) * 10) / 10 : null);
+    frrSeries.push(pd.received > 0 ? Math.round((pd.in_sla / pd.received) * 100) : null);
+  }
+
   return {
     avg_response_time: {
       today_minutes: todayAvg,
       seven_day_avg_minutes: sevenDayAvg,
       thirty_day_avg_minutes: thirtyAvg,
       trend,
+      series: respSeries,
     },
     first_response_rate: {
       today_percent: todayPct,
       target_percent: targetPct,
       status,
+      series: frrSeries,
     },
     by_inbox: byInboxOut,
   };

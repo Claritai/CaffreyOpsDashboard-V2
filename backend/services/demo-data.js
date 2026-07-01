@@ -140,11 +140,13 @@ function performance() {
       seven_day_avg_minutes: 62,
       thirty_day_avg_minutes: 71,
       trend: 'improving',
+      series: [78, 71, 68, 65, 60, 55, 47],
     },
     first_response_rate: {
       today_percent: 64,
       target_percent: 50,
       status: 'above_target',
+      series: [48, 52, 51, 58, 60, 61, 64],
     },
     by_inbox: {
       operations: { avg_minutes: 35, first_response_percent: 72 },

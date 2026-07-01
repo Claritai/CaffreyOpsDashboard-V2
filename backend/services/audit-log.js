@@ -127,7 +127,32 @@ function queryTypeReport({ from, to, queryType, jobNumber } = {}) {
        ORDER BY ts DESC LIMIT 5000`
   ).all(params);
 
-  return { from: from || null, to: to || null, queryType: queryType || null, total, byType, rows };
+  // Dense per-day counts (UTC day) across the range, 0-filled, for a sparkline.
+  const dayCounts = db.prepare(
+    `SELECT substr(ts, 1, 10) AS day, COUNT(*) AS count FROM audit_log WHERE ${where} GROUP BY day`
+  ).all(params);
+  const daily = buildDailySeries(from, to, dayCounts);
+
+  return { from: from || null, to: to || null, queryType: queryType || null, total, byType, rows, daily };
+}
+
+/** Build a dense [{day, count}] series across a range (0-filled, capped at 60 days). */
+function buildDailySeries(fromIso, toIso, dayCounts) {
+  const map = new Map(dayCounts.map(r => [r.day, r.count]));
+  const endDay = toIso ? new Date(toIso) : new Date();
+  let startDay = fromIso ? new Date(fromIso) : new Date(endDay.getTime() - 13 * 86_400_000);
+  const MAX_SPAN = 60 * 86_400_000;
+  if (endDay - startDay > MAX_SPAN) startDay = new Date(endDay.getTime() - MAX_SPAN);
+  const out = [];
+  let d = new Date(Date.UTC(startDay.getUTCFullYear(), startDay.getUTCMonth(), startDay.getUTCDate()));
+  const end = new Date(Date.UTC(endDay.getUTCFullYear(), endDay.getUTCMonth(), endDay.getUTCDate()));
+  let guard = 0;
+  while (d <= end && guard++ < 400) {
+    const key = d.toISOString().slice(0, 10);
+    out.push({ day: key, count: map.get(key) || 0 });
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return out;
 }
 
 /** CSV escaping for one cell. */

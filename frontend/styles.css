@@ -610,6 +610,11 @@ body.demo-mode .content-area::before {
 .qtype-bar { height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 3px; overflow: hidden; }
 .qtype-bar-fill { height: 100%; background: var(--brand-cyan); border-radius: 3px; }
 
+/* Sparklines */
+.perf-spark { display: block; margin-top: 10px; width: 100%; max-width: 120px; opacity: 0.9; }
+.qtype-spark { margin-top: 10px; }
+.qtype-spark .perf-spark { max-width: 100%; width: 100%; }
+
 .client-card.clickable { cursor: pointer; }
 .client-card.clickable:hover {
   transform: translateY(-1px);

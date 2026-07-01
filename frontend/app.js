@@ -1064,6 +1064,7 @@ async function loadTopQueryTypes() {
     overviewGrid2.innerHTML = `<div class="tile">
       <div class="tile-head"><span class="tile-label">Top Query Types (7d)</span>
         <span class="tile-sub">${data.total || 0} replies</span></div>
+      ${(data.daily && data.daily.length) ? `<div class="qtype-spark">${sparklineHtml(data.daily.map(d => d.count), { width: 220, height: 30 })}</div>` : ''}
       ${bodyHtml}
     </div>`;
     overviewGrid2.querySelectorAll('.qtype-row[data-qtype]').forEach(el => {
@@ -1471,7 +1472,31 @@ function perfAvgResponseCard(a) {
     <div class="perf-label">Avg Response</div>
     <div class="perf-value">${esc(value)}</div>
     <div class="perf-sub">${sub}</div>
+    ${sparklineHtml(a.series)}
   </div>`;
+}
+
+/**
+ * Tiny inline-SVG sparkline from a series of numbers (nulls are treated as gaps).
+ * Returns '' when there aren't at least two data points to draw.
+ */
+function sparklineHtml(values, opts = {}) {
+  if (!Array.isArray(values)) return '';
+  const width = opts.width || 96, height = opts.height || 26, pad = 3;
+  const pts = values.map((v, i) => ({ i, v })).filter(p => p.v != null && !Number.isNaN(p.v));
+  if (pts.length < 2) return '';
+  const xsMax = (values.length - 1) || 1;
+  const min = Math.min(...pts.map(p => p.v));
+  const max = Math.max(...pts.map(p => p.v));
+  const range = (max - min) || 1;
+  const X = i => pad + (i / xsMax) * (width - pad * 2);
+  const Y = v => height - pad - ((v - min) / range) * (height - pad * 2);
+  const line = pts.map(p => `${X(p.i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+  const last = pts[pts.length - 1];
+  return `<svg class="perf-spark" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points="${line}" fill="none" stroke="var(--brand-cyan)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${X(last.i).toFixed(1)}" cy="${Y(last.v).toFixed(1)}" r="2" fill="var(--brand-cyan)"/>
+  </svg>`;
 }
 
 function perfFirstReplyCard(f) {
@@ -1499,6 +1524,7 @@ function perfFirstReplyCard(f) {
     <div class="perf-label">First Reply (today, ≤ SLA)</div>
     <div class="perf-value">${esc(value)}</div>
     <div class="perf-sub">${sub}</div>
+    ${sparklineHtml(f.series)}
   </div>`;
 }
 
