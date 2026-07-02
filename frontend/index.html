@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=39">
+  <link rel="stylesheet" href="styles.css?v=40">
 </head>
 <body>
 
@@ -251,6 +251,7 @@
       <div class="email-detail-pane" id="email-detail-pane">
         <div class="detail-empty" id="detail-empty">Select an email to read</div>
         <div class="detail-content" id="detail-content">
+          <div class="inline-reply-slot" id="inline-reply-slot"></div>
           <div class="detail-header">
             <div class="detail-subject" id="detail-subject"></div>
             <div class="detail-meta">
@@ -327,7 +328,8 @@
       </div>
       <div class="form-group">
         <label class="form-label">Message</label>
-        <div class="rte-toolbar" id="compose-toolbar">
+        <div class="form-control rte-editor rte-editor-top" id="compose-body" contenteditable="true" data-placeholder="Write your message…"></div>
+        <div class="rte-toolbar rte-toolbar-bottom" id="compose-toolbar">
           <select class="rte-select" id="rte-font" title="Font">
             <option value="">Font</option>
             <option value="Arial, sans-serif">Arial</option>
@@ -354,7 +356,6 @@
           <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">&bull;</button>
           <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear formatting">T&times;</button>
         </div>
-        <div class="form-control rte-editor" id="compose-body" contenteditable="true" data-placeholder="Write your message…"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -492,6 +493,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=52"></script>
+<script src="app.js?v=53"></script>
 </body>
 </html>

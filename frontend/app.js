@@ -460,6 +460,9 @@ function renderSkeletons(count = 8) {
 async function openEmail(id) {
   state.selectedEmailId = id;
 
+  // Close any inline reply left open from a previous email.
+  if (composeCard && composeCard.classList.contains('inline')) closeCompose();
+
   emailList.querySelectorAll('.email-item').forEach(el => {
     el.classList.toggle('active', el.dataset.id === id);
   });
@@ -574,6 +577,9 @@ backBtn.addEventListener('click', hideDetail);
 
 // ── Compose / Reply ───────────────────────────────────────────────────────────
 
+const composeCard = document.querySelector('#compose-modal .modal');
+const inlineReplySlot = $('inline-reply-slot');
+
 function openCompose(opts = {}) {
   modalTitle.textContent = opts.reply ? 'Reply' : 'New Message';
   composeInbox.value = state.activeInbox;
@@ -588,7 +594,18 @@ function openCompose(opts = {}) {
   composeTemplateGroup.hidden = !opts.reply;
   composeTemplate.value = '';
   if (opts.reply) populateTemplateDropdown();
-  composeModal.classList.add('visible');
+  if (opts.reply) {
+    // Render inline, above the email being read — not as a pop-up.
+    composeCard.classList.add('inline');
+    inlineReplySlot.appendChild(composeCard);
+    composeModal.classList.remove('visible');
+    inlineReplySlot.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    // A brand-new message stays a centered modal.
+    composeCard.classList.remove('inline');
+    composeModal.appendChild(composeCard);
+    composeModal.classList.add('visible');
+  }
   composeTo.focus();
 }
 
@@ -606,6 +623,11 @@ replyBtn.addEventListener('click', () => {
 
 function closeCompose() {
   composeModal.classList.remove('visible');
+  // If it was rendered inline, return the card to its modal container.
+  if (composeCard.classList.contains('inline')) {
+    composeCard.classList.remove('inline');
+    composeModal.appendChild(composeCard);
+  }
   composeTo.value = '';
   composeSubject.value = '';
   composeBody.innerHTML = '';

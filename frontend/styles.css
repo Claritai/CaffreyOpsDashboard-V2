@@ -1599,6 +1599,26 @@ textarea.form-control { resize: vertical; min-height: 180px; }
   opacity: 0; cursor: pointer; border: none; padding: 0;
 }
 
+/* Toolbar placed BELOW the editor */
+.rte-editor-top { border-radius: 6px 6px 0 0; }
+.rte-toolbar-bottom {
+  border-top: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0 0 6px 6px;
+}
+
+/* Inline reply (rendered above the email instead of as a pop-up) */
+.inline-reply-slot:empty { display: none; }
+.inline-reply-slot { margin-bottom: 16px; }
+.modal.inline {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+.modal.inline .modal-body { overflow-y: visible; max-height: none; }
+
 /* All inputs in the compose/reply modal are white for readability. */
 #compose-modal .form-control,
 #canned-modal .form-control,
