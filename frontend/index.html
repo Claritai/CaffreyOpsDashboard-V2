@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=41">
+  <link rel="stylesheet" href="styles.css?v=42">
 </head>
 <body>
 
@@ -274,91 +274,87 @@
 
 <!-- ── Compose / Reply Modal ───────────────────────────────────────────────── -->
 <div class="modal-overlay" id="compose-modal">
-  <div class="modal">
+  <div class="modal" id="compose-card">
     <div class="modal-header">
       <span id="modal-title">New Message</span>
       <button class="btn btn-secondary btn-sm" id="modal-close">✕</button>
     </div>
-    <div class="modal-body compose-body-grid">
-      <div class="compose-col compose-col-main">
-        <div class="form-group">
-          <label class="form-label">From inbox</label>
-          <select class="form-control" id="compose-inbox">
-            <option value="operations">Operations</option>
-            <option value="export">Export</option>
-            <option value="ireland">Ireland</option>
-            <option value="uk">UK</option>
-            <option value="eu">EU</option>
-            <option value="offers">Offers</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">To</label>
-          <input type="email" class="form-control" id="compose-to" placeholder="recipient@example.com">
-        </div>
-        <div class="form-group" id="compose-cc-group">
-          <label class="form-label">CC (optional)</label>
-          <input type="email" class="form-control" id="compose-cc" placeholder="cc@example.com">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Subject</label>
-          <input type="text" class="form-control" id="compose-subject" placeholder="Subject">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Message</label>
-          <div class="form-control rte-editor rte-editor-top" id="compose-body" contenteditable="true" data-placeholder="Write your message…"></div>
-          <div class="rte-toolbar rte-toolbar-bottom" id="compose-toolbar">
-            <select class="rte-select" id="rte-font" title="Font">
-              <option value="">Font</option>
-              <option value="Arial, sans-serif">Arial</option>
-              <option value="Calibri, sans-serif">Calibri</option>
-              <option value="Georgia, serif">Georgia</option>
-              <option value="'Times New Roman', serif">Times</option>
-              <option value="'Courier New', monospace">Courier</option>
-            </select>
-            <select class="rte-select" id="rte-size" title="Font size">
-              <option value="">Size</option>
-              <option value="2">Small</option>
-              <option value="3">Normal</option>
-              <option value="5">Large</option>
-              <option value="6">Huge</option>
-            </select>
-            <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><b>B</b></button>
-            <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><i>I</i></button>
-            <button type="button" class="rte-btn" data-cmd="underline" title="Underline"><u>U</u></button>
-            <label class="rte-color-wrap" title="Text colour">
-              <span class="rte-color-a">A</span>
-              <input type="color" class="rte-color" id="rte-color" value="#0A1B3D">
-            </label>
-            <button type="button" class="rte-btn" id="rte-link" title="Insert link">🔗</button>
-            <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">&bull;</button>
-            <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear formatting">T&times;</button>
-          </div>
-        </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">From inbox</label>
+        <select class="form-control" id="compose-inbox">
+          <option value="operations">Operations</option>
+          <option value="export">Export</option>
+          <option value="ireland">Ireland</option>
+          <option value="uk">UK</option>
+          <option value="eu">EU</option>
+          <option value="offers">Offers</option>
+        </select>
       </div>
-      <div class="compose-col compose-col-side">
-        <div class="form-group" id="compose-query-type-group" hidden>
-          <label class="form-label" for="compose-query-type">Query type</label>
-          <select class="form-control" id="compose-query-type">
-            <option value="">Select query type…</option>
-            <option value="ETA Request">ETA Request</option>
-            <option value="POD Request">POD Request</option>
-            <option value="Quote">Quote</option>
-            <option value="Ferry Booking">Ferry Booking</option>
-            <option value="Customs Documentation">Customs Documentation</option>
-            <option value="Timeslot Booking">Timeslot Booking</option>
-            <option value="General Enquiry">General Enquiry</option>
+      <div class="form-group">
+        <label class="form-label">To</label>
+        <input type="email" class="form-control" id="compose-to" placeholder="recipient@example.com">
+      </div>
+      <div class="form-group" id="compose-cc-group">
+        <label class="form-label">CC (optional)</label>
+        <input type="email" class="form-control" id="compose-cc" placeholder="cc@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" class="form-control" id="compose-subject" placeholder="Subject">
+      </div>
+      <div class="form-group" id="compose-query-type-group" hidden>
+        <label class="form-label" for="compose-query-type">Query type</label>
+        <select class="form-control" id="compose-query-type">
+          <option value="">Select query type…</option>
+          <option value="ETA Request">ETA Request</option>
+          <option value="POD Request">POD Request</option>
+          <option value="Quote">Quote</option>
+          <option value="Ferry Booking">Ferry Booking</option>
+          <option value="Customs Documentation">Customs Documentation</option>
+          <option value="Timeslot Booking">Timeslot Booking</option>
+          <option value="General Enquiry">General Enquiry</option>
+        </select>
+      </div>
+      <div class="form-group" id="compose-job-group" hidden>
+        <label class="form-label" for="compose-job-number">Job number</label>
+        <input type="text" class="form-control" id="compose-job-number" placeholder="e.g. J-10421 (required)" maxlength="60">
+      </div>
+      <div class="form-group" id="compose-template-group" hidden>
+        <label class="form-label" for="compose-template">Canned responses</label>
+        <select class="form-control" id="compose-template">
+          <option value="">Insert a canned response…</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <div class="form-control rte-editor rte-editor-top" id="compose-body" contenteditable="true" data-placeholder="Write your message…"></div>
+        <div class="rte-toolbar rte-toolbar-bottom" id="compose-toolbar">
+          <select class="rte-select" id="rte-font" title="Font">
+            <option value="">Font</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="Calibri, sans-serif">Calibri</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times</option>
+            <option value="'Courier New', monospace">Courier</option>
           </select>
-        </div>
-        <div class="form-group" id="compose-job-group" hidden>
-          <label class="form-label" for="compose-job-number">Job number</label>
-          <input type="text" class="form-control" id="compose-job-number" placeholder="e.g. J-10421 (required)" maxlength="60">
-        </div>
-        <div class="form-group" id="compose-template-group" hidden>
-          <label class="form-label" for="compose-template">Canned responses</label>
-          <select class="form-control" id="compose-template">
-            <option value="">Insert a canned response…</option>
+          <select class="rte-select" id="rte-size" title="Font size">
+            <option value="">Size</option>
+            <option value="2">Small</option>
+            <option value="3">Normal</option>
+            <option value="5">Large</option>
+            <option value="6">Huge</option>
           </select>
+          <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><b>B</b></button>
+          <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><i>I</i></button>
+          <button type="button" class="rte-btn" data-cmd="underline" title="Underline"><u>U</u></button>
+          <label class="rte-color-wrap" title="Text colour">
+            <span class="rte-color-a">A</span>
+            <input type="color" class="rte-color" id="rte-color" value="#0A1B3D">
+          </label>
+          <button type="button" class="rte-btn" id="rte-link" title="Insert link">🔗</button>
+          <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">&bull;</button>
+          <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear formatting">T&times;</button>
         </div>
       </div>
     </div>
@@ -497,6 +493,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=54"></script>
+<script src="app.js?v=55"></script>
 </body>
 </html>

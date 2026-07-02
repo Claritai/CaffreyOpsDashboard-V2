@@ -537,7 +537,7 @@ function renderDetail(email) {
       iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
     };
   } else {
-    detailBody.innerHTML = `<pre style="white-space:pre-wrap;font-family:inherit">${esc(email.body?.content || '')}</pre>`;
+    detailBody.innerHTML = `<div class="detail-body-html"><pre style="white-space:pre-wrap;font-family:inherit;margin:0">${esc(email.body?.content || '')}</pre></div>`;
   }
 
   // Store for reply
@@ -577,7 +577,7 @@ backBtn.addEventListener('click', hideDetail);
 
 // ── Compose / Reply ───────────────────────────────────────────────────────────
 
-const composeCard = document.querySelector('#compose-modal .modal');
+const composeCard = $('compose-card');
 const inlineReplySlot = $('inline-reply-slot');
 
 function openCompose(opts = {}) {
