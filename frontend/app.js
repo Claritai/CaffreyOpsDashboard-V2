@@ -669,6 +669,8 @@ composeModal.addEventListener('click', e => { if (e.target === composeModal) clo
 // ── Rich-text toolbar for the message editor ─────────────────────────────────
 const rteFont = $('rte-font');
 const rteSize = $('rte-size');
+const rteColor = $('rte-color');
+const rteLink = $('rte-link');
 const composeToolbar = $('compose-toolbar');
 let rteSavedRange = null;
 function rteSaveRange() {
@@ -676,7 +678,8 @@ function rteSaveRange() {
   if (sel && sel.rangeCount && composeBody.contains(sel.anchorNode)) rteSavedRange = sel.getRangeAt(0);
 }
 function rteRestoreRange() {
-  if (!rteSavedRange) { composeBody.focus(); return; }
+  composeBody.focus();
+  if (!rteSavedRange) return;
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(rteSavedRange);
@@ -706,6 +709,30 @@ if (composeToolbar) {
     document.execCommand('fontSize', false, rteSize.value);
     rteSaveRange();
     rteSize.selectedIndex = 0;
+  });
+  // Text colour: apply once the native picker closes.
+  rteColor.addEventListener('change', () => {
+    rteRestoreRange();
+    document.execCommand('foreColor', false, rteColor.value);
+    rteSaveRange();
+  });
+  // Keep the current selection when the colour swatch is clicked.
+  rteColor.addEventListener('mousedown', rteSaveRange);
+  // Insert / create link.
+  rteLink.addEventListener('mousedown', e => {
+    e.preventDefault();           // keep the selection in the editor
+    rteSaveRange();
+    const url = prompt('Link address (include https://):', 'https://');
+    if (!url) return;
+    rteRestoreRange();
+    const sel = window.getSelection();
+    if (sel && sel.isCollapsed) {
+      // Nothing selected — insert the address as a clickable link.
+      document.execCommand('insertHTML', false, `<a href="${esc(url)}">${esc(url)}</a>`);
+    } else {
+      document.execCommand('createLink', false, url);
+    }
+    rteSaveRange();
   });
 }
 

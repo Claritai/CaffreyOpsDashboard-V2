@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=38">
+  <link rel="stylesheet" href="styles.css?v=39">
 </head>
 <body>
 
@@ -346,6 +346,11 @@
           <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><b>B</b></button>
           <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><i>I</i></button>
           <button type="button" class="rte-btn" data-cmd="underline" title="Underline"><u>U</u></button>
+          <label class="rte-color-wrap" title="Text colour">
+            <span class="rte-color-a">A</span>
+            <input type="color" class="rte-color" id="rte-color" value="#0A1B3D">
+          </label>
+          <button type="button" class="rte-btn" id="rte-link" title="Insert link">🔗</button>
           <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">&bull;</button>
           <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear formatting">T&times;</button>
         </div>
@@ -487,6 +492,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=51"></script>
+<script src="app.js?v=52"></script>
 </body>
 </html>
