@@ -125,6 +125,44 @@ async function patchMessage(session, inboxKey, messageId, patch) {
   return graphRequest(session, 'PATCH', `/users/${email}/messages/${messageId}`, patch);
 }
 
+// Soft-delete: Graph moves the message to the mailbox's Deleted Items folder.
+async function deleteMessage(session, inboxKey, messageId) {
+  const email = getInboxEmail(inboxKey);
+  if (!email) throw new ApiError(`Unknown inbox: ${inboxKey}`, { status: 404, code: 'unknown_inbox' });
+  return graphRequest(session, 'DELETE', `/users/${email}/messages/${messageId}`);
+}
+
+// List messages from a specific well-known folder (e.g. 'deleteditems', 'drafts') of one mailbox.
+async function listFolderMessages(session, inboxKey, folder, params = {}) {
+  const email = getInboxEmail(inboxKey);
+  if (!email) throw new ApiError(`Unknown inbox: ${inboxKey}`, { status: 404, code: 'unknown_inbox' });
+  const top = params.top || 50;
+  const fields = [
+    'id', 'subject', 'from', 'toRecipients', 'receivedDateTime', 'lastModifiedDateTime',
+    'isRead', 'importance', 'hasAttachments', 'bodyPreview', 'flag',
+  ].join(',');
+  const orderBy = folder === 'drafts' ? 'lastModifiedDateTime' : 'receivedDateTime';
+  const path = `/users/${email}/mailFolders/${folder}/messages?$top=${top}&$select=${fields}&$orderby=${orderBy} desc`;
+  return graphRequest(session, 'GET', path);
+}
+
+// Aggregate one well-known folder across all inbox mailboxes, tagging each message
+// with the inbox it came from so the frontend can open it in the right mailbox.
+async function listFolderAcrossInboxes(session, folder, params = {}) {
+  const per = Math.min(params.perInbox || 25, 50);
+  const settled = await Promise.allSettled(
+    INBOX_KEYS.map(key =>
+      listFolderMessages(session, key, folder, { top: per })
+        .then(r => (r.value || []).map(m => ({ ...m, inbox: key })))
+    )
+  );
+  const merged = [];
+  for (const r of settled) if (r.status === 'fulfilled') merged.push(...r.value);
+  const dateOf = m => new Date(m.receivedDateTime || m.lastModifiedDateTime || 0).getTime();
+  merged.sort((a, b) => dateOf(b) - dateOf(a));
+  return { value: merged.slice(0, params.top || 100) };
+}
+
 async function getUnreadCount(session, inboxKey) {
   const email = getInboxEmail(inboxKey);
   if (!email) return 0;
@@ -358,7 +396,8 @@ async function getDashboardStats(session) {
 }
 
 module.exports = {
-  listMessages, getMessage, sendMessage, patchMessage,
+  listMessages, getMessage, sendMessage, patchMessage, deleteMessage,
+  listFolderMessages, listFolderAcrossInboxes,
   getDashboardStats, getOverview, getInboxEmail, INBOX_KEYS,
   fetchInboxAndSent, londonDateKey,
 };

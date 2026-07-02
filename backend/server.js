@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const { doubleCsrf } = require('csrf-csrf');
 
 const { getAuthCodeUrl, acquireTokenByCode } = require('./auth');
-const { listMessages, getMessage, sendMessage, patchMessage, getDashboardStats, getOverview } = require('./graph');
+const { listMessages, getMessage, sendMessage, patchMessage, deleteMessage, listFolderAcrossInboxes, getDashboardStats, getOverview } = require('./graph');
 const {
   requireAuth, authLimiter, apiLimiter, sendLimiter, errorHandler,
   requestId, requestLogger, ApiError,
@@ -241,6 +241,30 @@ app.get('/api/emails/:inbox', requireAuth, apiLimiter, async (req, res, next) =>
 app.get('/api/emails/:inbox/:id', requireAuth, apiLimiter, async (req, res, next) => {
   try {
     const data = await getMessage(req.session, req.params.inbox, req.params.id);
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
+// Delete an email — moves it to the mailbox's Deleted Items folder.
+app.delete('/api/emails/:inbox/:id', requireAuth, csrfProtect, apiLimiter, async (req, res, next) => {
+  try {
+    if (isDemoMode(req)) return res.json({ ok: true, demo: true });
+    await deleteMessage(req.session, req.params.inbox, req.params.id);
+    auditLog.record('email_deleted', {
+      user: req.session.user && req.session.user.email, ip: req.ip,
+      detail: { inbox: req.params.inbox, id: req.params.id },
+    });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+// Aggregated well-known folder (deleted / drafts) across all inbox mailboxes.
+app.get('/api/folders/:folder', requireAuth, apiLimiter, async (req, res, next) => {
+  try {
+    const map = { deleted: 'deleteditems', drafts: 'drafts' };
+    const folder = map[req.params.folder];
+    if (!folder) return res.status(404).json({ error: 'Unknown folder' });
+    const data = await listFolderAcrossInboxes(req.session, folder, req.query);
     res.json(data);
   } catch (err) { next(err); }
 });

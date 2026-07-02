@@ -1416,6 +1416,16 @@ body.demo-mode .content-area::before {
 .priority-badge.normal { background: rgba(151, 196, 89, 0.15); color: var(--status-success); }
 .priority-badge.client { background: rgba(252, 237, 194, 0.16); color: var(--brand-cream); border: 1px solid rgba(252, 237, 194, 0.35); }
 .priority-badge.attachment { background: rgba(138, 155, 194, 0.12); color: var(--text-secondary); }
+.email-inbox-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(96, 165, 200, 0.16);
+  color: var(--brand-cyan);
+}
 
 /* ── Email detail ─────────────────────────────────────────────────────────── */
 

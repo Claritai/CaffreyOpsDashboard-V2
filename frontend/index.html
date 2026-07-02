@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caffrey International — Email Operations</title>
-  <link rel="stylesheet" href="styles.css?v=43">
+  <link rel="stylesheet" href="styles.css?v=44">
 </head>
 <body>
 
@@ -110,6 +110,20 @@
           </span>
           <span class="inbox-name">Offers</span>
           <span class="badge zero" id="badge-offers">0</span>
+        </div>
+        <div class="inbox-item" data-folder="drafts">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide FileText -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </span>
+          <span class="inbox-name">Drafts</span>
+        </div>
+        <div class="inbox-item" data-folder="deleted">
+          <span class="inbox-icon" aria-hidden="true">
+            <!-- lucide Trash2 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </span>
+          <span class="inbox-name">Deleted</span>
         </div>
       </div>
 
@@ -263,6 +277,7 @@
           <div class="detail-actions">
             <button class="btn btn-primary btn-sm" id="reply-btn">Reply</button>
             <button class="btn btn-secondary btn-sm" id="mark-read-btn">Mark unread</button>
+            <button class="btn btn-secondary btn-sm" id="delete-btn">Delete</button>
             <button class="btn btn-secondary btn-sm" id="back-btn" style="display:none">← Back</button>
           </div>
           <div class="detail-body" id="detail-body"></div>
@@ -493,6 +508,6 @@
 <!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<script src="app.js?v=55"></script>
+<script src="app.js?v=56"></script>
 </body>
 </html>

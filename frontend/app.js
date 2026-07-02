@@ -80,6 +80,7 @@ const detailTime    = $('detail-time');
 const detailBody    = $('detail-body');
 const replyBtn      = $('reply-btn');
 const markReadBtn   = $('mark-read-btn');
+const deleteBtn     = $('delete-btn');
 const backBtn       = $('back-btn');
 const composeBtn    = $('compose-btn');
 const composeModal  = $('compose-modal');
@@ -335,6 +336,7 @@ function showLoginError(msg) {
 
 async function loadInbox(inboxKey, append = false) {
   state.activeInbox = inboxKey;
+  state.activeFolder = null;
   state.selectedEmailId = null;
   paneTitle.textContent = INBOX_LABELS[inboxKey] || inboxKey;
   composeInbox.value = inboxKey;
@@ -359,6 +361,26 @@ async function loadInbox(inboxKey, append = false) {
     updateLastRefresh();
   } catch (err) {
     emailList.innerHTML = `<div class="inline-error">Failed to load emails: ${formatErrorMessage(err)}</div>`;
+    handleApiError(err);
+  }
+}
+
+// Aggregated folder view (Deleted / Drafts) across all mailboxes.
+async function loadFolder(folder) {
+  state.activeInbox = null;
+  state.activeFolder = folder;
+  state.selectedEmailId = null;
+  paneTitle.textContent = folder === 'deleted' ? 'Deleted' : 'Drafts';
+  hideDetail();
+  renderSkeletons();
+  state.emails = [];
+  try {
+    const data = await apiFetch(`/api/folders/${folder}`);
+    state.emails = data.value || [];
+    renderEmailList(state.emails);
+    updateLastRefresh();
+  } catch (err) {
+    emailList.innerHTML = `<div class="inline-error">Failed to load ${folder}: ${formatErrorMessage(err)}</div>`;
     handleApiError(err);
   }
 }
@@ -429,6 +451,7 @@ function renderEmailItem(email) {
   const hasAttachment = email.hasAttachments;
 
   const badges = [
+    email.inbox ? `<span class="email-inbox-tag">${esc(INBOX_LABELS[email.inbox] || email.inbox)}</span>` : '',
     isPriority ? `<span class="priority-badge client">Priority Client</span>` : '',
     isHighImportance ? `<span class="priority-badge high">Urgent</span>` : '',
     hasAttachment ? `<span class="priority-badge attachment">📎</span>` : '',
@@ -459,6 +482,11 @@ function renderSkeletons(count = 8) {
 
 async function openEmail(id) {
   state.selectedEmailId = id;
+  // In aggregated folder views (Deleted/Drafts) each item carries its own inbox.
+  const item = state.emails.find(e => e.id === id);
+  const inboxKey = (item && item.inbox) || state.activeInbox || 'operations';
+  state.selectedEmailInbox = inboxKey;
+  composeInbox.value = inboxKey;
 
   // Close any inline reply left open from a previous email.
   if (composeCard && composeCard.classList.contains('inline')) closeCompose();
@@ -479,16 +507,18 @@ async function openEmail(id) {
   // On mobile, show detail pane
   $('email-detail-pane').classList.add('mobile-visible');
   backBtn.style.display = 'inline-flex';
+  // Deleting an already-deleted item would remove it permanently — hide Delete there.
+  deleteBtn.style.display = state.activeFolder === 'deleted' ? 'none' : 'inline-flex';
 
   try {
-    const email = await apiFetch(`/api/emails/${state.activeInbox}/${encodeURIComponent(id)}`);
+    const email = await apiFetch(`/api/emails/${inboxKey}/${encodeURIComponent(id)}`);
     renderDetail(email);
 
     // Mark as read in local state
     const local = state.emails.find(e => e.id === id);
     if (local && !local.isRead) {
       local.isRead = true;
-      apiFetch(`/api/emails/${state.activeInbox}/${encodeURIComponent(id)}`, {
+      apiFetch(`/api/emails/${inboxKey}/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRead: true }),
@@ -556,9 +586,10 @@ function hideDetail() {
 
 markReadBtn.addEventListener('click', async () => {
   if (!state.selectedEmailId) return;
+  const inboxKey = state.selectedEmailInbox || state.activeInbox;
   const isRead = markReadBtn.dataset.currentRead === '1';
   try {
-    await apiFetch(`/api/emails/${state.activeInbox}/${encodeURIComponent(state.selectedEmailId)}`, {
+    await apiFetch(`/api/emails/${inboxKey}/${encodeURIComponent(state.selectedEmailId)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isRead: !isRead }),
@@ -575,6 +606,26 @@ markReadBtn.addEventListener('click', async () => {
 
 backBtn.addEventListener('click', hideDetail);
 
+// ── Delete ────────────────────────────────────────────────────────────────────
+deleteBtn.addEventListener('click', async () => {
+  if (!state.selectedEmailId) return;
+  const inboxKey = state.selectedEmailInbox || state.activeInbox;
+  if (!confirm('Delete this email? It will be moved to the Deleted folder.')) return;
+  deleteBtn.disabled = true;
+  try {
+    await apiFetch(`/api/emails/${inboxKey}/${encodeURIComponent(state.selectedEmailId)}`, { method: 'DELETE' });
+    state.emails = state.emails.filter(e => e.id !== state.selectedEmailId);
+    renderEmailList(state.emails);
+    hideDetail();
+    loadStats();
+    toast('Email moved to Deleted.', 'success');
+  } catch (err) {
+    errorToast('Couldn’t delete email', err);
+  } finally {
+    deleteBtn.disabled = false;
+  }
+});
+
 // ── Compose / Reply ───────────────────────────────────────────────────────────
 
 const composeCard = $('compose-card');
@@ -582,7 +633,9 @@ const inlineReplySlot = $('inline-reply-slot');
 
 function openCompose(opts = {}) {
   modalTitle.textContent = opts.reply ? 'Reply' : 'New Message';
-  composeInbox.value = state.activeInbox;
+  composeInbox.value = opts.reply
+    ? (state.selectedEmailInbox || state.activeInbox || 'operations')
+    : (state.activeInbox || 'operations');
   composeTo.value = opts.to || '';
   composeSubject.value = opts.subject || '';
   setBodyText(opts.body || '');
@@ -1088,6 +1141,13 @@ document.querySelectorAll('.inbox-item').forEach(el => {
     if (el.dataset.view === 'canned') { openCannedManager(); return; }
     if (el.dataset.view === 'support') { openSupport(); return; }
     if (el.dataset.view === 'settings') { showSettings(); return; }
+    const folder = el.dataset.folder;
+    if (folder) {
+      state.searchQuery = '';
+      searchInput.value = '';
+      showFolder(folder);
+      return;
+    }
     const key = el.dataset.inbox;
     if (key) {
       state.searchQuery = '';
@@ -1138,6 +1198,14 @@ function showInbox(inboxKey) {
   setActiveSidebar(`.inbox-item[data-inbox="${inboxKey}"]`);
   stopHypercareTimers();
   loadInbox(inboxKey);
+}
+
+function showFolder(folder) {
+  state.view = folder; // 'deleted' | 'drafts'
+  setContentView('view-inbox');
+  setActiveSidebar(`.inbox-item[data-folder="${folder}"]`);
+  stopHypercareTimers();
+  loadFolder(folder);
 }
 
 function showHypercare() {
