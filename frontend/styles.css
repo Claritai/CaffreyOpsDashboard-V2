@@ -1619,6 +1619,23 @@ textarea.form-control { resize: vertical; min-height: 180px; }
 }
 .modal.inline .modal-body { overflow-y: visible; max-height: none; }
 
+/* Two-column reply: main fields left, tagging/canned right (inline reply only) */
+.modal.inline .compose-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  align-items: start;
+}
+.modal.inline .compose-col-side .form-group:first-child { margin-top: 0; }
+@media (max-width: 900px) {
+  .modal.inline .compose-body-grid { grid-template-columns: 1fr; }
+}
+
+/* While replying inline, let the whole reading pane scroll so the original
+   email is reachable underneath the reply box. */
+.detail-content.replying { overflow-y: auto; }
+.detail-content.replying .detail-body { overflow-y: visible; flex: 0 0 auto; }
+
 /* All inputs in the compose/reply modal are white for readability. */
 #compose-modal .form-control,
 #canned-modal .form-control,

@@ -599,6 +599,7 @@ function openCompose(opts = {}) {
     composeCard.classList.add('inline');
     inlineReplySlot.appendChild(composeCard);
     composeModal.classList.remove('visible');
+    detailContent.classList.add('replying');
     inlineReplySlot.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
     // A brand-new message stays a centered modal.
@@ -623,6 +624,7 @@ replyBtn.addEventListener('click', () => {
 
 function closeCompose() {
   composeModal.classList.remove('visible');
+  detailContent.classList.remove('replying');
   // If it was rendered inline, return the card to its modal container.
   if (composeCard.classList.contains('inline')) {
     composeCard.classList.remove('inline');

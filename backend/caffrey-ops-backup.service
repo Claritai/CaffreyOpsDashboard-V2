@@ -1,0 +1,11 @@
+[Unit]
+Description=Caffrey Ops nightly backup
+After=caffrey-ops.service
+
+[Service]
+Type=oneshot
+User=www-data
+WorkingDirectory=/var/www/caffrey-ops/backend
+ExecStart=/var/www/caffrey-ops/backend/scripts/backup.sh
+EnvironmentFile=/var/www/caffrey-ops/backend/.env
+UMask=0077
