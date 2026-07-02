@@ -1623,6 +1623,11 @@ textarea.form-control { resize: vertical; min-height: 180px; }
    email is reachable underneath the reply box. */
 .detail-content.replying { overflow-y: auto; }
 .detail-content.replying .detail-body { overflow-y: visible; flex: 0 0 auto; }
+/* Show the email's Subject / From / To above the reply box, and hide the
+   Reply button (you're already replying). */
+.detail-content.replying .detail-header,
+.detail-content.replying .detail-actions { order: -1; }
+.detail-content.replying #reply-btn { display: none; }
 
 /* All inputs in the compose/reply modal are white for readability. */
 #compose-card .form-control,
